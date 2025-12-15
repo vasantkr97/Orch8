@@ -1,0 +1,116 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+model User {
+  id                  String         @id @default(uuid())
+  email               String         @unique
+  password            String         
+  username            String
+
+  workflows           Workflow[]
+  credentials         Credentials[]
+  executions          Execution[]
+
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+}
+
+
+model Workflow {
+  id                   String         @id @default(uuid())
+  title                String         
+  isActive             Boolean        @default(false)
+  webhookToken         String?        @unique  // Unique token for webhook authentication
+  
+  userId              String
+  user                User            @relation(fields: [userId], references: [id])
+
+
+  nodes               Json
+  connections         Json
+
+  executions          Execution[]
+  
+  
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  triggerType         TriggerType      //manual, webhook
+
+}
+
+model Execution {
+  id                String          @id  @default(cuid())
+  status            ExecStatus
+  mode              ExecutionMode        // "manual", "webhhok"
+  data              Json                 //All execution data and node outputs
+
+  workflowId        String
+  workflow          Workflow        @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  userId            String
+  user              User            @relation(fields: [userId], references: [id])
+
+  results           Json?
+  startedAt         DateTime?
+  finishedAt        DateTime?
+  createdAt         DateTime        @default(now())
+}
+
+model Credentials {
+  id               String           @id  @default(cuid())
+  title            String
+  platform         Platform          //googleApi, stripeApi,"apiKey", "httpHeaderAuth", "customApiKey" etc Credential type Identifier
+  data             Json              //sensitive authentication information
+
+  userId           String
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+enum ExecStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+enum Platform {
+  ResendEmail
+  Telegram
+  Gemini
+}
+
+enum TriggerType {
+  MANUAL
+  WEBHOOK
+  CRON
+}
+
+enum Method {
+  GET
+  POST 
+  PUT
+}
+
+enum ExecutionMode {
+  MANUAL
+  TRIGGER
+  WEBHOOK
+  CRON
+}

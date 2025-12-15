@@ -1,5 +1,5 @@
 {
-  "name": "Orch8",
+  "name": "orch8",
   "private": true,
   "scripts": {
     "build": "turbo run build",
