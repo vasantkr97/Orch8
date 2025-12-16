@@ -1,6 +1,14 @@
-import { Router } from "express";
-import { auth } from "../middleware/auth";
+import { Router } from "express"
+import { getMe, signin, signout, signup } from "../controllers/auth.controller"
 
-export const authRouter = Router(); 
+const router = Router()
 
-authRouter.use(auth)
+router.post("/signup", signup);
+
+router.post("/signin", signin);
+
+router.post("signout", signout);
+
+router.get("/me", getMe);
+
+export default router

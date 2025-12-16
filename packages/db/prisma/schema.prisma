@@ -88,6 +88,7 @@ enum ExecStatus {
   RUNNING
   SUCCESS
   FAILED
+  STOPPED
 }
 
 enum Platform {
@@ -110,7 +111,6 @@ enum Method {
 
 enum ExecutionMode {
   MANUAL
-  TRIGGER
   WEBHOOK
   CRON
 }

@@ -1,6 +1,8 @@
 import express, { type Request, type Response } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import authRouter from "./routes/auth.routes"
+import credentialsRoutes from "./routes/credentials.routes"
 
 
 const PORT = process.env.PORT || 3000;
@@ -26,13 +28,13 @@ app.get("/", (req, res) => {
     res.send("healthy")
 })
 
-// app.use("/api/auth", authRouter);
+app.use("/api/auth", authRouter);
 
-// app.use("/api/workflows", workflowRoutes);
+app.use("/api/workflows", workflowRoutes);
 
-// app.use("/api/credentials", credentialsRoutes);
+app.use("/api/credentials", credentialsRoutes);
 
-// app.use("/api/executions", executionRoutes);
+app.use("/api/executions", executionRoutes);
 
 
 app.listen(PORT, () => {
