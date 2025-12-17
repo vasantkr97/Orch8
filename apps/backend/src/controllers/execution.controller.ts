@@ -31,7 +31,7 @@ export const manualExecute = async (req: Request, res: Response) => {
             })
         }
 
-        const executionId = await executeWorkflow(workflowId, userId, "MANUAL")
+        const executionId = await executeWorkflow(workflowId, userId, "manual")
 
         res.status(200).json({
             success: true,
@@ -74,7 +74,7 @@ export const webhookExecute = async (req: Request, res: Response) => {
             return res.status(404).json({ error: "Workflow not found or access denied"})
         }
 
-        const executionId = await executionWorkflow(workflowId, userId, "WEBHOOK");
+        const executionId = await executionWorkflow(workflowId, userId, "webhook");
 
         return res.status(200).json({
             success: true,
@@ -125,7 +125,7 @@ export const publicWebhookExecute = async (req: Request, res: Response) => {
         console.log(`Webhook authenticated for workflow: ${workflowId}`);
 
         //Execute the workflow with the workflow owner's userId
-        const executionId = await executionWorkflow(workflowId, workflow.userId, "WEBHOOK")
+        const executionId = await executionWorkflow(workflowId, workflow.userId, "webhook")
 
         return res.status(200).json({
             success: true,
@@ -240,7 +240,7 @@ export const getAllExecutions = async (req: Request, res: Response) => {
     }
 }
 
-export const getWorkflowExecution = async (req: Request, res: Response)=>{
+export const getWorkflowExecutions = async (req: Request, res: Response)=>{
     try {
         const { workflowId } = req.params;
         const { status } = req.query;

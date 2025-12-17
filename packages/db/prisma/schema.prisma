@@ -84,33 +84,33 @@ model Credentials {
 }
 
 enum ExecStatus {
-  PENDING
-  RUNNING
-  SUCCESS
-  FAILED
-  STOPPED
+  pending
+  running
+  success
+  failed
+  stopped
 }
 
 enum Platform {
-  ResendEmail
-  Telegram
-  Gemini
+  resendemail
+  telegram
+  gemini
 }
 
 enum TriggerType {
-  MANUAL
-  WEBHOOK
-  CRON
+  manual
+  webhook
+  cron
 }
 
 enum Method {
-  GET
-  POST 
-  PUT
+  get
+  post 
+  put
 }
 
 enum ExecutionMode {
-  MANUAL
-  WEBHOOK
-  CRON
+  manual
+  webhook
+  cron
 }

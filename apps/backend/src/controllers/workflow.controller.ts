@@ -51,7 +51,7 @@ export const createWorkflow = async (req: Request, res: Response) => {
     }
 }
 
-export const getallWorkflow = async (req: Request, res: Response) => {
+export const getallWorkflows = async (req: Request, res: Response) => {
     try {
         const userId = req.user?.id
 
@@ -89,7 +89,6 @@ export const getallWorkflow = async (req: Request, res: Response) => {
         })
     }
 }
-
 
 export const getWorkflowById = async (req: Request, res: Response) => {
     try {
@@ -216,7 +215,6 @@ export const updateWorkflow = async (req: Request, res: Response) => {
     }
 }
 
-
 export const deleteWorkflow = async (req: Request, res: Response) => {
     try {
         const { workflowId } = req.params
@@ -258,3 +256,5 @@ export const deleteWorkflow = async (req: Request, res: Response) => {
         })
     } 
 }
+
+

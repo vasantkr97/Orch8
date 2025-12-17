@@ -3,6 +3,8 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import authRouter from "./routes/auth.routes"
 import credentialsRoutes from "./routes/credentials.routes"
+import workflowRoutes from "./routes/workflow.routes"
+import executionRoutes from "./routes/execution.routes"
 
 
 const PORT = process.env.PORT || 3000;
