@@ -1,11 +1,14 @@
 import { Router } from "express";
 import { deleteCredentials, getCredentialById, getCredentials, postCredentials, updateCredentials } from "../controllers/credentials.controller";
+import { auth } from "../middleware/auth";
 
 const router = Router()
 
+router.use(auth)
+
 router.post("/postCredentials", postCredentials);
 
-router.post("/getCredentials", getCredentials);
+router.get("/getCredentials", getCredentials);
 
 router.get("/getCredentialById/:id", getCredentialById);
 

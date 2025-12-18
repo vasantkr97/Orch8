@@ -1,7 +1,10 @@
 import dotenv from "dotenv";
 import path from "path";
 
+console.log("[DB Package] __dirname:", typeof __dirname !== 'undefined' ? __dirname : 'undefined');
+console.log("[DB Package] DATABASE_URL present:", !!process.env.DATABASE_URL);
 dotenv.config({ path: path.resolve(__dirname, ".env") });
+
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";

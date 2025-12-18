@@ -6,11 +6,12 @@ import replaceVariable from "../replaceVariable";
 export async function executionTelegram (
     node: WorkflowNode,
     context: ExecutionContext,
-    credentialId: any,
+    credentialId: string,
     previousNodeId?: string
 ): Promise<any> {
     try {
 
+        console.log("telegram started executing...")
         if (!credentialId) {
             throw new Error("Telegram credentials not provided. Please select or create credentials.")
         }
@@ -92,6 +93,8 @@ export async function executionTelegram (
 
         const result = await response.json()
 
+        console.log("telegram response:", result)
+
         if (!response.ok) {
             throw new Error(`Telegram API error: ${result ?? "Unknown error"}`)
         }
@@ -103,6 +106,7 @@ export async function executionTelegram (
             message: "Telegram message sent successfully"
         }
     } catch (error:any) {
+        console.error("Telegram Executor failed:", error);
         if (error.name === "AbortError") {
             return {
                 success: false,

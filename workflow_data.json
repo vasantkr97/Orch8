@@ -1,0 +1,88 @@
+{
+  "title": "AI Content Automation Workflow",
+  "isActive": true,
+  "triggerType": "MANUAL",
+  "nodes": [
+    {
+      "id": "trigger-1",
+      "type": "manual-trigger",
+      "name": "Manual Start",
+      "position": [100, 200],
+      "parameters": {},
+      "webhook": null,
+      "credentials": {}
+    },
+    {
+      "id": "gemini-1",
+      "type": "action-gemini",
+      "name": "Generate Content",
+      "position": [400, 200],
+      "parameters": {
+        "prompt": "Write a short, inspiring quote about technology.",
+        "model": "gemini-1.5-flash",
+        "temperature": 0.7
+      },
+      "credentials": {
+        "gemini": {
+          "id": "REPLACE_WITH_YOUR_GEMINI_CREDENTIAL_ID",
+          "name": "Gemini API"
+        }
+      }
+    },
+    {
+      "id": "telegram-1",
+      "type": "action-telegram",
+      "name": "Send to Telegram",
+      "position": [700, 200],
+      "parameters": {
+        "chatId": "REPLACE_WITH_YOUR_CHAT_ID",
+        "usePreviousResult": true,
+        "previousNodeId": "gemini-1",
+        "parseMode": "Markdown"
+      },
+      "credentials": {
+        "telegram": {
+          "id": "REPLACE_WITH_YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot"
+        }
+      }
+    },
+    {
+      "id": "email-1",
+      "type": "action-email",
+      "name": "Send Email Backup",
+      "position": [1000, 200],
+      "parameters": {
+        "from": "onboarding@resend.dev",
+        "to": "REPLACE_WITH_YOUR_EMAIL@example.com",
+        "subject": "New AI Generated Quote",
+        "text": "Here is the quote: {{previous}}",
+        "usePreviousResult": true,
+        "previousNodeId": "gemini-1"
+      },
+      "credentials": {
+        "email": {
+          "id": "REPLACE_WITH_YOUR_EMAIL_CREDENTIAL_ID",
+          "name": "Resend API"
+        }
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-1",
+      "source": "trigger-1",
+      "target": "gemini-1"
+    },
+    {
+      "id": "conn-2",
+      "source": "gemini-1",
+      "target": "telegram-1"
+    },
+    {
+      "id": "conn-3",
+      "source": "gemini-1",
+      "target": "email-1"
+    }
+  ]
+}

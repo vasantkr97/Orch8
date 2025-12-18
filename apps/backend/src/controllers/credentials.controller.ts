@@ -15,15 +15,10 @@ export const postCredentials = async (req: Request, res: Response) => {
             return res.status(400).json({ msg: "All credentials fields are required"});
         }
 
-        const normalizedPlatform = normalizePlatform(platform);
-        if (!normalizedPlatform) {
-            return res.status(400).json({ msg: "Invalid platform"});
-        }
-
         const credentials = await prisma.credentials.create({
             data: {
                 title,
-                platform: normalizedPlatform as any,
+                platform,
                 data,
                 userId
             }
@@ -125,7 +120,6 @@ export const updateCredentials =  async (req: Request, res: Response) => {
             return res.status(404).json({ msg: "credentials not found or not owned by user"})
         }
 
-        const normalizedPlatform = platform ? normalizePlatform(platform) : undefined
 
         const updated = await prisma.credentials.update({
             where: {
@@ -133,7 +127,7 @@ export const updateCredentials =  async (req: Request, res: Response) => {
             },
             data: {
                 title: title ?? existing.title,
-                platform: (normalizedPlatform as any) ?? existing.platform,
+                platform: platform ?? existing.platform,
                 data: data ?? existing.data
             }
         })
@@ -189,17 +183,4 @@ export const deleteCredentials = async (req: Request, res: Response) => {
         console.error("Error deleting credentials:", error);
         return res.status(500).json({ msg: "Internal server error"})
     }
-}
-
-
-
-function normalizePlatform(input: string): string | null {
-    const value = String(input || "").trim().toLowerCase();
-    if(!value) return null;
-    if (value === "telegram") return "Telegram";
-    if (value === "gemini") return "Gemini";
-    if (value === "email" || value === "resend" || value === "resendemail") return "ResendEmail";
-
-    if (["Telegram", "Gemini", "ResendEmail"].includes(input)) return input;
-    return null;
 }

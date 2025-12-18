@@ -2,12 +2,12 @@ import { prisma } from "@orch8/db"
 import type { ExecutionContext, WorkflowNode } from "../../types/executionTypes";
 import replaceVariable from "../replaceVariable";
 
-export async function executeEmailNode( 
-    node: WorkflowNode, 
-    context: ExecutionContext, 
-    credentialId: string, 
+export async function executeEmailNode(
+    node: WorkflowNode,
+    context: ExecutionContext,
+    credentialId: string,
     previousNodeId?: string
-) : Promise<any> {
+): Promise<any> {
     try {
         console.log("email is called")
 
@@ -16,9 +16,9 @@ export async function executeEmailNode(
         }
 
         const credentials = await prisma.credentials.findFirst({
-            where: { 
-                id: credentialId, 
-                userId: context.userId, 
+            where: {
+                id: credentialId,
+                userId: context.userId,
             }
         })
 
@@ -32,7 +32,7 @@ export async function executeEmailNode(
             throw new Error("Resend API key not found in credentials");
         }
 
-        const apiKey = credentialData.apikey;
+        const apikey = credentialData.apikey;
 
         let { from, to, subject, html, text, usePreviousResult } = node.parameters as any;
         if (usePreviousResult && context.data) {
@@ -41,7 +41,7 @@ export async function executeEmailNode(
                 let previousNodeResult: any;
 
                 //Use the immediate previous node result
-                if (previousNodeId && context.data && typeof context.data === "object")  {
+                if (previousNodeId && context.data && typeof context.data === "object") {
                     previousNodeResult = context.data[previousNodeId]
                 } else {
                     //fallback to explicitly configured previousNodeId
@@ -56,7 +56,7 @@ export async function executeEmailNode(
                 } else if (typeof previousNodeResult === "object") {
                     previousText = JSON.stringify(previousNodeResult);
                 }
-            } catch(err: any) {
+            } catch (err: any) {
                 console.error("[Email Node] failed to extract previous result", err);
             }
 
@@ -77,7 +77,7 @@ export async function executeEmailNode(
                     text = previousText;
                 }
             }
-        } 
+        }
 
         if (!from || !to || !subject) {
             throw new Error('From, to, and subject are required for email action');
@@ -91,7 +91,7 @@ export async function executeEmailNode(
         const processedHtml = html ? replaceVariable(html, context) : undefined;
         const processedText = text ? replaceVariable(text, context) : undefined;
 
-         
+
         const emailData: any = {
             from,
             to: Array.isArray(to) ? to : [to],
@@ -104,13 +104,15 @@ export async function executeEmailNode(
         const response = await fetch('https://api.resend.com/emails', {
             method: "POST",
             headers: {
-                "Authorization": `Bearer ${apiKey}`,
+                "Authorization": `Bearer ${apikey}`,
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(emailData)
         })
 
         const result = await response.json() as any;
+
+        console.log("email node response", response)
 
         console.log("email node result", result)
 
@@ -125,6 +127,9 @@ export async function executeEmailNode(
         }
 
     } catch (error: any) {
+        console.log("Email execution failed:", error
+
+        )
         return {
             success: false,
             data: null,

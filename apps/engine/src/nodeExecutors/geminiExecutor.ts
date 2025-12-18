@@ -10,8 +10,10 @@ export async function executeGemini(
     credentialId: string,
     previousNodeId?: string
 ): Promise<any> {
-    
+
     try {
+
+        console.log("Gemini action started...")
 
         if (!credentialId) {
             throw new Error("Gemini credentials not provided. Please select or create credentials.")
@@ -23,10 +25,10 @@ export async function executeGemini(
                 userId: context.userId
             }
         })
-        
+
         if (!credentials || !credentials.data || typeof credentials.data !== "object") {
             throw new Error("Gemini credentials not found")
-        }   
+        }
 
         const credentialData = credentials.data as { apikey?: string }
 
@@ -34,9 +36,9 @@ export async function executeGemini(
 
         let { prompt, model = "gemini-1.5-flash", temperature = 0.7, usePreviousResult, apiKey: apiKeyFromParams } = node.parameters as any
 
-        const apiKey = apiKeyFromCred ?? apiKeyFromParams
+        const apikey = apiKeyFromCred ?? apiKeyFromParams
 
-        if (!apiKey) {
+        if (!apikey) {
             throw new Error("Gemini API key not provided. Select credentials or enter an API key in the node config.");
         }
 
@@ -46,7 +48,7 @@ export async function executeGemini(
 
                 if (previousNodeId && typeof context.data === "object") {
                     previousNodeResult = context.data[previousNodeId]
-                } 
+                }
                 if (!previousNodeResult) {
                     const preferredNodeId = node.parameters?.previousNodeId
                     if (preferredNodeId && typeof context.data === "object") {
@@ -72,14 +74,14 @@ export async function executeGemini(
 
         const processedPrompt = replaceVariable(prompt, context)
 
-        const client = new GoogleGenAI(apiKey);
+        const client = new GoogleGenAI({ apiKey: apikey });
 
         const response = await client.models.generateContent({
             model,
             contents: [
                 {
                     role: "user",
-                    parts: [{ text: processedPrompt}]
+                    parts: [{ text: processedPrompt }]
                 }
             ],
             config: {
@@ -90,7 +92,7 @@ export async function executeGemini(
         })
 
         const generatedText = response?.text;
-        console.log(generatedText)
+        console.log("gemini response:", generatedText)
 
         return {
             success: true,
@@ -100,7 +102,9 @@ export async function executeGemini(
             },
             msg: "Agent response generated sucessfully"
         }
+
     } catch (error) {
+        console.log("gemini execution failed", error)
         return {
             success: false,
             data: null,

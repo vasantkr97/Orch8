@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { prisma } from "@orch8/db"
+import { executeWorkflow } from "@orch8/engine"
 
 
 export const manualExecute = async (req: Request, res: Response) => {
@@ -46,7 +47,6 @@ export const manualExecute = async (req: Request, res: Response) => {
     }
 };
 
-
 export const webhookExecute = async (req: Request, res: Response) => {
     try {
         const { workflowId } = req.params;
@@ -74,7 +74,7 @@ export const webhookExecute = async (req: Request, res: Response) => {
             return res.status(404).json({ error: "Workflow not found or access denied"})
         }
 
-        const executionId = await executionWorkflow(workflowId, userId, "webhook");
+        const executionId = await executeWorkflow(workflowId, userId, "webhook");
 
         return res.status(200).json({
             success: true,
@@ -87,7 +87,6 @@ export const webhookExecute = async (req: Request, res: Response) => {
         return res.status(500).json({ success: false, error: error.message })
     }
 }
-
 
 export const publicWebhookExecute = async (req: Request, res: Response) => {
     try {
@@ -103,6 +102,13 @@ export const publicWebhookExecute = async (req: Request, res: Response) => {
             return res.status(401).json({
                 success: false,
                 error: "Webhook token is required. Please provide token in query parameter (?token=xxx) or X-Webhook-Token header."
+            })
+        }
+
+        if (!workflowId) {
+            return res.status(404).json({
+                error: "Unauthorized",
+                msg: "Workflow ID is required"
             })
         }
 
@@ -125,7 +131,7 @@ export const publicWebhookExecute = async (req: Request, res: Response) => {
         console.log(`Webhook authenticated for workflow: ${workflowId}`);
 
         //Execute the workflow with the workflow owner's userId
-        const executionId = await executionWorkflow(workflowId, workflow.userId, "webhook")
+        const executionId = await executeWorkflow(workflowId, workflow.userId, "webhook")
 
         return res.status(200).json({
             success: true,
@@ -267,7 +273,7 @@ export const getWorkflowExecutions = async (req: Request, res: Response)=>{
         }
 
         if (status) {
-            whereClause.status
+            whereClause.status = status
         }
 
         const executions = await prisma.execution.findMany({
@@ -356,7 +362,7 @@ export const stopExecution = async (req: Request, res: Response) => {
             return res.status(404).json({ error: "Execution not found or access denied"})
         }
 
-        if (execution.status !== "RUNNING" && execution.status !== "PENDING") {
+        if (execution.status !== "running" && execution.status !== "pending") {
             return res.status(400).json({ error: "Cannot stop execution that is not running or pending"})
         }
 
@@ -365,7 +371,7 @@ export const stopExecution = async (req: Request, res: Response) => {
                 id: executionId
             },
             data: {
-                status: "STOPPED",
+                status: "stopped",
                 finishedAt: new Date(),
                 results: {
                     error: "Execution stopped by user",
@@ -394,7 +400,7 @@ export const deleteExecution = async (req: Request, res: Response) => {
         const { executionId } = req.params
         const userId = req.user?.id
 
-        console.log(`Deleting execuiton ${executionId} for user ${userId}`)
+        console.log(`Deleting execution ${executionId} for user ${userId}`)
 
         if (!userId) {
             return res.status(400).json({ error: "User not Authenticated"})
