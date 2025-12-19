@@ -327,10 +327,10 @@ export const getExecutionsStatus = async (req: Request, res: Response) => {
 
         return res.status(200).json({
             success: true,
-            data: execution
+            data: execution.status
         })
     } catch (error: any) {
-        console.error("Get execution status error:", error)
+        console.error("Get executsion status error:", error)
         res.status(500).json({
             success: false,
             error: error.message,

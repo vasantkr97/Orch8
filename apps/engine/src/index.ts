@@ -273,33 +273,47 @@ async function executeNode(
         node.type?.toLowerCase().includes(type)
     )
 
+    const startedAt = new Date();
+    let result: any;
+
     if (isTrigger) {
         console.log(`Trigger node executed: ${node.name}`)
-        return {
+        result = {
             success: true,
             data: context.data || {},
             timestamp: new Date().toISOString(),
             nodeType: node.type
         }
+    } else {
+        
+        const credentialId = extractCredentialId(node)
+        const nodeType = node.type.toLowerCase();
+
+        if (nodeType.includes("telegram")) {
+
+            result = await executionTelegram(node, context, credentialId ?? "", previousNodeId);
+        
+        } else if (nodeType.includes("email")) {
+            
+            result = await executeEmailNode(node, context, credentialId ?? "", previousNodeId);
+        
+        } else if (nodeType.includes("gemini")) {
+            
+            result = await executeGemini(node, context, credentialId ?? "", previousNodeId);
+        
+        } else {
+            
+            throw new Error(`Unsupported node type: ${node.type}`)
+        
+        }
     }
 
-    const credentialId = extractCredentialId(node)
-
-    const nodeType = node.type.toLowerCase();
-
-    if (nodeType.includes("telegram")) {
-        return await executionTelegram(node, context, credentialId ?? "", previousNodeId);
+    const finishedAt = new Date();
+    return {
+        ...result,
+        startedAt,
+        finishedAt
     }
-
-    if (nodeType.includes("email")) {
-        return await executeEmailNode(node, context, credentialId ?? "", previousNodeId);
-    }
-
-    if (nodeType.includes("gemini")) {
-        return await executeGemini(node, context, credentialId ?? "", previousNodeId);
-    }
-
-    throw new Error(`Unsupported node type: ${node.type}`)
 }
 
 

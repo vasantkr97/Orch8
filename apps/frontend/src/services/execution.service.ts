@@ -1,7 +1,7 @@
 import { axiosInstance } from "../lib/axios";
 
 
-export const manuaExecute = async (workflowId: string) => {
+export const manualExecute = async (workflowId: string) => {
     const { data } = await axiosInstance.post(`/execution/workflow/${workflowId}/execute`)
     return data
 }

@@ -12,7 +12,7 @@ router.get("/getallWorkflows", getallWorkflows);
 
 router.get("/getWorkflowById/:workflowId", getWorkflowById);
 
-router.post("/updateWorkflow/:workflowId", updateWorkflow);
+router.put("/updateWorkflow/:workflowId", updateWorkflow);
 
 router.delete("/deleteWorkflow/:workflowId", deleteWorkflow);
 

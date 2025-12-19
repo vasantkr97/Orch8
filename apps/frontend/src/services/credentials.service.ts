@@ -7,7 +7,7 @@ export const postCredential = async (credentialData: CredentialData) => {
     return res.data
 }
 
-export const getCredential = async () => {
+export const getCredentials = async () => {
     const res = await axiosInstance.get("/credentials/getCredentials");
     return res.data
 }
