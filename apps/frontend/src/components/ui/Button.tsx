@@ -37,9 +37,9 @@ export const Button: React.FC<ButtonProps> = ({
       focus:ring-blue-500
     `,
     secondary: `
-      bg-orange-600 hover:bg-orange-700 border border-orange-500 hover:border-orange-400
-      text-white shadow-md hover:shadow-lg shadow-orange-500/25
-      focus:ring-orange-500
+      bg-indigo-600 hover:bg-indigo-700 border border-indigo-500 hover:border-indigo-400
+      text-white shadow-md hover:shadow-lg shadow-indigo-500/25
+      focus:ring-indigo-500
     `,
     success: `
       bg-green-600 hover:bg-green-700 border border-green-500 hover:border-green-400

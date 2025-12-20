@@ -7,7 +7,7 @@ export const nodeTypes = {
     'orch8-node': orch8Node,
     manual: orch8Node,
     webhook: orch8Node,
-    email: EmailNode,
+    resendemail: EmailNode,
     telegram: TelegramNode,
     gemini: GeminiAgentNode,
 };
@@ -29,10 +29,11 @@ export const createOrch8Node = (
     }
 ) => ({
     id,
-    type: type, 
+    type: type,
+    position,
     data: {
         ...data,
-        type, 
+        type,
     },
 });
 
@@ -53,7 +54,7 @@ export const nodeConfigs = {
     },
 
     // === Actions ===
-    email: {
+    resendemail: {
         icon: '📧',
         color: '#dc3545',
         label: 'Email',

@@ -10,7 +10,7 @@ interface NodeSelectorProps {
 
 const nodeCategories = {
   'Triggers': ['manual', 'webhook'],
-  'Actions': ['telegram', 'email', 'gemini'],
+  'Actions': ['telegram', 'resendemail', 'gemini'],
 };
 
 export const NodeSelector = ({ onNodeSelect, onClose, isVisible }: NodeSelectorProps) => {

@@ -9,9 +9,9 @@ interface CredentialsSelectorProps {
   compact?: boolean;
 }
 
-export function CredentialsSelector({ 
-  credentialType, 
-  selectedCredentialId, 
+export function CredentialsSelector({
+  credentialType,
+  selectedCredentialId,
   onChange,
   compact = false,
 }: CredentialsSelectorProps) {
@@ -19,7 +19,7 @@ export function CredentialsSelector({
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [formData, setFormData] = useState<any>({});
 
-  const { data: response, isLoading } = useQuery({
+  const { data: response, isLoading, isError, error } = useQuery({
     queryKey: ['credentials', credentialType],
     queryFn: getCredentials,
     staleTime: 0,
@@ -38,12 +38,12 @@ export function CredentialsSelector({
       const newId = (data && (data.id || data?.data?.id || data?.credential?.id || data?.created?.id)) || '';
       if (newId) {
         onChange(String(newId));
-        alert('✅ Credential saved successfully!');
+        alert('Credential saved successfully!');
       }
     },
     onError: (error: any) => {
       console.error('Failed to create credential:', error);
-      alert(`❌ Failed to save credential: ${error.response?.data?.msg || error.message}`);
+      alert(`Failed to save credential: ${error.response?.data?.msg || error.message}`);
     },
   });
 
@@ -58,16 +58,21 @@ export function CredentialsSelector({
     return platform === type || platform.includes(type) || type.includes(platform);
   });
 
+  console.log('CredentialsSelector Debug:', {
+    credentialType,
+    responseRaw: response,
+    allCredentials,
+    filteredCredentials: credentials,
+    filteringBy: credentialType.toLowerCase()
+  });
+
   const handleCreateCredential = () => {
     if (!formData.title) return;
-    
+
     const credentialData: any = {
       title: formData.title,
       // send enum value expected by backend
-      platform: credentialType.toLowerCase() === 'telegram' ? 'Telegram'
-               : credentialType.toLowerCase() === 'gemini' ? 'Gemini'
-               : credentialType.toLowerCase() === 'email' || credentialType.toLowerCase() === 'resend' ? 'ResendEmail'
-               : credentialType,
+      platform: credentialType.toLowerCase(),
     };
 
     // Map form data based on credential type
@@ -77,11 +82,11 @@ export function CredentialsSelector({
     } else if (credentialType.toLowerCase() === 'gemini') {
       if (!formData.apiKey) return;
       credentialData.data = { apiKey: formData.apiKey };
-    } else if (credentialType.toLowerCase() === 'email') {
+    } else if (credentialType.toLowerCase() === 'resendemail') {
       if (!formData.apiKey || !formData.fromEmail) return;
-      credentialData.data = { 
+      credentialData.data = {
         apiKey: formData.apiKey,
-        fromEmail: formData.fromEmail 
+        fromEmail: formData.fromEmail
       };
     }
 
@@ -90,14 +95,23 @@ export function CredentialsSelector({
 
   const isFormValid = () => {
     if (!formData.title) return false;
-    
+
     const type = credentialType.toLowerCase();
     if (type === 'telegram') return !!formData.botToken;
     if (type === 'gemini') return !!formData.apiKey;
-    if (type === 'email') return !!(formData.apiKey && formData.fromEmail);
-    
+    if (type === 'resendemail') return !!(formData.apiKey && formData.fromEmail);
+
     return false;
   };
+
+  if (isError) {
+    return (
+      <div className={`w-full border border-red-700 rounded-lg ${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2 text-sm'} bg-red-900/20 text-red-300 flex items-center`}>
+        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        Error loading credentials: {(error as any)?.message || 'Unknown error'}
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -163,7 +177,7 @@ export function CredentialsSelector({
             </div>
           )}
 
-          {credentialType.toLowerCase() === 'email' && (
+          {credentialType.toLowerCase() === 'resendemail' && (
             <>
               <div>
                 <label className="block text-[11px] text-gray-300 mb-1">Resend API Key *</label>
@@ -224,9 +238,8 @@ export function CredentialsSelector({
             setShowCreateForm(false);
           }
         }}
-        className={`w-full border rounded-lg ${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2.5 text-sm'} focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-800 text-white transition-all ${
-          selectedCredentialId ? 'border-green-500' : 'border-gray-700'
-        }`}
+        className={`w-full border rounded-lg ${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2.5 text-sm'} focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-800 text-white transition-all ${selectedCredentialId ? 'border-green-500' : 'border-gray-700'
+          }`}
       >
         <option value="">Select Credential</option>
         {credentials.map((cred: any) => (

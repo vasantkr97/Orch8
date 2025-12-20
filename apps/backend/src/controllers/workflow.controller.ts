@@ -186,8 +186,8 @@ export const updateWorkflow = async (req: Request, res: Response) => {
         if ( isActive !== undefined) updateData.isActive = isActive;
         if (triggerType !== undefined){
             updateData.triggerType = triggerType;
-            //Generate webhook token if changing to WEBHOOK and does not have one
-            if (triggerType === "WEBHOOK" && !(existingWorkflow as any).webhookToken) {
+            //Generate webhook token if changing to webhook and does not have one
+            if (triggerType === "webhook" && !(existingWorkflow as any).webhookToken) {
                 updateData.webhookToken = crypto.randomBytes(32).toString('hex')
             }
         }

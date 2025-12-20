@@ -37,12 +37,12 @@ export function GeminiParams({ data, setData }: any) {
           Model
         </label>
         <select
-          value={params.model || "gemini-1.5-flash"}
+          value={params.model || "gemini-2.5-flash"}
           onChange={(e) => setData({ ...data, parameters: { ...params, model: e.target.value } })}
           className="w-full border rounded px-3 py-2 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
         >
-          <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-          <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+          <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+          <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
           <option value="gemini-pro">Gemini Pro</option>
         </select>
       </div>

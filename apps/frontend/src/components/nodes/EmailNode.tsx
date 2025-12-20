@@ -101,7 +101,7 @@ function EmailQuickConfig({ id, data }: any) {
       <div>
         <label className="block text-[11px] text-gray-400 mb-1">Credentials</label>
         <CredentialsSelector
-          credentialType="email"
+          credentialType="resendemail"
           selectedCredentialId={local.credentialsId}
           onChange={(id: string) => setLocal((l) => ({ ...l, credentialsId: id }))}
           compact
