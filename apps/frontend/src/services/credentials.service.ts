@@ -2,7 +2,7 @@ import { axiosInstance } from "../lib/axios";
 import type { CredentialData, UpdateCredentialData } from "../types/credential.types";
 
 
-export const postCredential = async (credentialData: CredentialData) => {
+export const postCredentials = async (credentialData: CredentialData) => {
     const res = await axiosInstance.post("/credentials/postCredentials", credentialData);
     return res.data
 }
