@@ -11,7 +11,8 @@ export async function executeTelegram (
 ): Promise<any> {
     try {
 
-        console.log("telegram started executing...")
+        console.log("telegram started executing...");
+
         if (!credentialId) {
             throw new Error("Telegram credentials not provided. Please select or create credentials.")
         }
@@ -80,13 +81,15 @@ export async function executeTelegram (
 
         const responseJson: any = await response.json()
 
-        console.log("telegram response:", responseJson.result.text)
-        console.log("telegram node execution completed.")
-
-        if (!response.ok) {
-            throw new Error(`Telegram API error: ${responseJson.result.text ?? "Unknown error"}`)
+        if (!response.ok || !responseJson.ok) {
+            const errorMsg = responseJson.description || responseJson.error || "Unknown Telegram API error";
+            console.error("Telegram API error:", errorMsg);
+            throw new Error(`Telegram API error: ${errorMsg}`);
         }
-        
+
+        const sentText = responseJson.result?.text;
+        console.log("telegram response:", sentText);
+        console.log("telegram node execution completed.")
 
         return {
             success: true,

@@ -6,7 +6,6 @@ import { auth } from "../middleware/auth"
 const router = Router()
 
 //public webhook endpoint - NO authentication required
-//Must be defined before auth middleware
 router.post("/webhookExecute/:workflowId", publicWebhookExecute)
 
 router.use(auth)

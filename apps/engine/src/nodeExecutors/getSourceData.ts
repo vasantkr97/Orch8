@@ -14,18 +14,14 @@ export function getSourceData(
 
     if (!sourceNodeId) {
         throw new Error(
-            `Node "${node.name}" has usePreviousResult enabled but no sourceNodeId specified. ` +
-            `Please configure the Source Node ID in node settings.`
-        );
+            `Node "${node.name}" has usePreviousResult enabled but no sourceNodeId specified.`);
     }
 
     const sourceData = context.data?.[sourceNodeId];
 
     if (sourceData === undefined) {
         throw new Error(
-            `Node "${node.name}" references sourceNodeId "${sourceNodeId}" but no data exists. ` +
-            `Ensure the source node executes before this node and produces output.`
-        );
+            `Node "${node.name}" references sourceNodeId "${sourceNodeId}" but no data exists.`);
     }
 
     return sourceData;

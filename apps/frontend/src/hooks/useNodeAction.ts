@@ -34,41 +34,63 @@ export const useNodeActions = ({ workflowId, setNodes, setEdges, webhookToken }:
     const newNodeId = generateId();
     const cfg = getNodeConfig(nodeType);
     
-    const position = {
-      x: (window.innerWidth / 2) - 100,
-      y: (window.innerHeight / 2) - 50
-    };
+    // Calculate position based on existing nodes to avoid overlap
+    setNodes((currentNodes: any[]) => {
+      let position;
+      
+      if (cfg.isTrigger) {
+        // For trigger nodes: stack vertically on the left side
+        const triggerCount = currentNodes.filter((n: any) => n.data?.isTrigger).length;
+        position = {
+          x: 100,
+          y: 100 + (triggerCount * 150) // Stack triggers vertically with 150px gap
+        };
+      } else {
+        // For action nodes: find rightmost node and position to the right
+        const rightmostX = currentNodes.length > 0 
+          ? Math.max(...currentNodes.map((n: any) => n.position?.x || 0))
+          : 100;
+        const avgY = currentNodes.length > 0
+          ? currentNodes.reduce((sum: number, n: any) => sum + (n.position?.y || 0), 0) / currentNodes.length
+          : 200;
+        
+        position = {
+          x: rightmostX + 300, // Position 300px to the right of the rightmost node
+          y: avgY
+        };
+      }
 
-    const newNode = createOrch8Node(newNodeId, nodeType, position, {
-      ...cfg,
-      label: cfg.label,
-      description: cfg.description,
-      workflowId: workflowId,
-      // Pass webhookToken if this is a webhook node and we have one
-      ...(nodeType === 'webhook' && webhookToken && { webhookToken }),
-      onQuickUpdate: (partial: any) => {
-        setNodes((nodes: any) => nodes.map((n: any) => {
-          if (n.id !== newNodeId) return n;
-          const nextData = { ...n.data };
-          // merge credentialsId directly under data
-          if (partial && Object.prototype.hasOwnProperty.call(partial, 'credentialsId')) {
-            nextData.credentialsId = partial.credentialsId;
-          }
-          // merge parameters
-          if (partial && partial.parameters) {
-            nextData.parameters = { ...(n.data?.parameters || {}), ...partial.parameters };
-          }
-          // also allow direct shallow fields (e.g., usePreviousResult fallback)
-          if (partial && Object.prototype.hasOwnProperty.call(partial, 'usePreviousResult')) {
-            nextData.parameters = { ...(n.data?.parameters || {}), usePreviousResult: partial.usePreviousResult };
-          }
-          return { ...n, data: nextData };
-        }));
-      },
-    } as any);
+      const newNode = createOrch8Node(newNodeId, nodeType, position, {
+        ...cfg,
+        label: cfg.label,
+        description: cfg.description,
+        workflowId: workflowId,
+        // Pass webhookToken if this is a webhook node and we have one
+        ...(nodeType === 'webhook' && webhookToken && { webhookToken }),
+        onQuickUpdate: (partial: any) => {
+          setNodes((nodes: any) => nodes.map((n: any) => {
+            if (n.id !== newNodeId) return n;
+            const nextData = { ...n.data };
+            // merge credentialsId directly under data
+            if (partial && Object.prototype.hasOwnProperty.call(partial, 'credentialsId')) {
+              nextData.credentialsId = partial.credentialsId;
+            }
+            // merge parameters
+            if (partial && partial.parameters) {
+              nextData.parameters = { ...(n.data?.parameters || {}), ...partial.parameters };
+            }
+            // also allow direct shallow fields (e.g., usePreviousResult fallback)
+            if (partial && Object.prototype.hasOwnProperty.call(partial, 'usePreviousResult')) {
+              nextData.parameters = { ...(n.data?.parameters || {}), usePreviousResult: partial.usePreviousResult };
+            }
+            return { ...n, data: nextData };
+          }));
+        },
+      } as any);
 
-    setNodes((nds: any) => [...nds, newNode]);
-  }, [setNodes, workflowId]);
+      return [...currentNodes, newNode];
+    });
+  }, [setNodes, workflowId, webhookToken]);
 
   const handleUpdateNodeData = useCallback((nodeId: string, data: any) => {
     setNodes((nodes: any) =>

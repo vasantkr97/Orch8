@@ -44,12 +44,6 @@ export const WorkflowToolbar = ({
     <div className="glass-effect border-b border-gray-800 px-4 py-2.5 backdrop-blur-xl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/30">
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-
           <div className="flex items-center gap-3">
             {isEditingTitle ? (
               <input
@@ -63,11 +57,11 @@ export const WorkflowToolbar = ({
               />
             ) : (
               <h1
-                className="text-base font-semibold text-white cursor-pointer hover:text-blue-400 transition-colors flex items-center gap-1.5 group"
+                className="text-[16px] font-semibold text-white cursor-pointer hover:text-blue-400 transition-colors flex items-center gap-1.5 group"
                 onClick={() => setIsEditingTitle(true)}
                 title="Click to edit"
               >
-                {workflowTitle || 'Untitled'}
+                {workflowTitle || 'untitled'}
                 <svg className="w-3 h-3 text-gray-500 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                 </svg>
@@ -91,9 +85,7 @@ export const WorkflowToolbar = ({
           </div>
         </div>
 
-        {/* Right side - Action buttons - Compact */}
         <div className="flex items-center gap-2">
-          {/* Create Workflow */}
           <Button
             onClick={onNewWorkflow}
             variant="secondary"

@@ -6,7 +6,7 @@ const orch8Node = memo(({ data, selected, id }: NodeProps) => {
     const [copied, setCopied] = useState(false);
 
     const getStatusIcon = () => {
-        return (data as any)?.icon || '⚙️'; 
+        return (data as any)?.icon || ''; 
     };
 
     const isTrigger = Boolean((data as any)?.isTrigger);
@@ -15,18 +15,18 @@ const orch8Node = memo(({ data, selected, id }: NodeProps) => {
     const webhookToken = (data as any)?.webhookToken;
 
     const webhookUrl = isWebhook && workflowId && webhookToken
-        ? `http://localhost:3000/api/executions/webhook/${workflowId}?token=${webhookToken}`
+        ? `http://localhost:3000/api/executions/webhookExecute/${workflowId}?token=${webhookToken}`
         : null;
 
     const copyWebhookUrl = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (webhookUrl) {
             navigator.clipboard.writeText(webhookUrl);
-            alert('✅ Webhook URL copied to clipboard!\n\n' + webhookUrl + '\n\n🔒 Keep it private! Anyone with this URL can trigger your workflow.\n\n💡 Make sure your workflow is Active (toggle in toolbar).');
+            alert('Webhook URL copied to clipboard!\n\n' + webhookUrl + '\n\n🔒 Keep it private! Anyone with this URL can trigger your workflow.\n\n💡 Make sure your workflow is Active (toggle in toolbar).');
         } else if (isWebhook && !workflowId) {
-            alert('⚠️ Please save the workflow first to generate a webhook URL.');
+            alert('Please save the workflow first to generate a webhook URL.');
         } else if (isWebhook && !webhookToken) {
-            alert('⚠️ No webhook token found. Please save the workflow to generate a webhook token.');
+            alert('No webhook token found. Please save the workflow to generate a webhook token.');
         }
     };
 
@@ -58,7 +58,7 @@ const orch8Node = memo(({ data, selected, id }: NodeProps) => {
                         </svg>
                     )}
                 </button>
-                {isWebhook && (
+                {webhookUrl && (
                     <button
                         onClick={copyWebhookUrl}
                         className="hover:scale-110 transition-transform"

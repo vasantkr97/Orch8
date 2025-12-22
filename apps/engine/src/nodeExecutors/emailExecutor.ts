@@ -15,6 +15,8 @@ export async function executeEmailNode(
             throw new Error("Email credentials not provided. Please select or create credentials.");
         }
 
+        console.log(`[Email] Looking for credential: ${credentialId} for user: ${context.userId}`);
+
         const credentials = await prisma.credentials.findFirst({
             where: {
                 id: credentialId,
@@ -22,8 +24,10 @@ export async function executeEmailNode(
             }
         })
 
+        console.log(`[Email] Found credentials:`, credentials ? `ID: ${credentials.id}, Platform: ${credentials.platform}` : 'NONE');
+
         if (!credentials || !credentials.data || typeof credentials.data !== "object") {
-            throw new Error("Email credentials not found")
+            throw new Error(`Email credentials not found for ID: ${credentialId}`)
         }
 
         const credentialData = credentials.data as { apikey?: string }

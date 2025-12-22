@@ -92,8 +92,8 @@ export const publicWebhookExecute = async (req: Request, res: Response) => {
     try {
         const { workflowId } = req.params
 
-        const tokenFromQuery = req.query.token as string;
-        const tokenFromHeader = req.headers["x-webhook-token"] as string;
+        const tokenFromQuery = req.query.token;
+        const tokenFromHeader = req.headers["x-webhook-token"];
         const providedToken = tokenFromQuery || tokenFromHeader;
 
         console.log(`Public webhook triggered for workflow: ${workflowId}`)
@@ -101,7 +101,7 @@ export const publicWebhookExecute = async (req: Request, res: Response) => {
         if (!providedToken) {
             return res.status(401).json({
                 success: false,
-                error: "Webhook token is required. Please provide token in query parameter (?token=xxx) or X-Webhook-Token header."
+                error: "Webhook token is required. Provide it via query parameter (?token=xxx) or X-Webhook-Token header."
             })
         }
 

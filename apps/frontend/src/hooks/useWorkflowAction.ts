@@ -138,12 +138,14 @@ export const useWorkflowActions = ({
 
       if (workflowId) {
         const response = await updateWorkflow(workflowId, workflowData);
-        if (response.data?.webhookToken) {
+        if (response.data) {
+          const returnedToken = response.data.webhookToken;
           setNodes((nds: any[]) => nds.map((n: any) => ({
             ...n,
             data: {
               ...n.data,
-              webhookToken: n.type === 'webhook' ? response.data.webhookToken : n.data.webhookToken
+              workflowId: workflowId,
+              webhookToken: (n.type === 'webhook' && returnedToken) ? returnedToken : (n.data.webhookToken || returnedToken)
             }
           })));
         }

@@ -102,7 +102,7 @@ const AgentNode = memo(({ data, selected, id }: NodeProps) => {
         )}
         {(data as any)?.hasError && (
           <div className="absolute inset-0 bg-red-500 bg-opacity-20 rounded-lg flex items-center justify-center">
-            <span className="text-red-300 text-lg">❌</span>
+            <span className="text-red-300 text-lg"></span>
           </div>
         )}
       </div>

@@ -29,7 +29,6 @@ export function CredentialsSelector({
   const createMutation = useMutation({
     mutationFn: postCredentials,
     onSuccess: (data) => {
-      // Refresh both generic and type-scoped credential caches
       queryClient.invalidateQueries({ queryKey: ['credentials'], exact: false });
       queryClient.invalidateQueries({ queryKey: ['credentials', credentialType], exact: false });
       setShowCreateForm(false);

@@ -13,7 +13,7 @@ export async function executeWorkflow(
 ): Promise<string> {
 
     if (!workflowId || !userId) {
-        throw new Error("WOrkflow ID and User ID are requried");
+        throw new Error("Workflow ID and User ID are required");
     }
 
     const workflow = await prisma.workflow.findUnique({
@@ -98,7 +98,7 @@ async function executeInBackground(
             executionOrder: []  // Track exact execution order for frontend visualization
         }
 
-        const triggerTypes = ["trigger", "manual", "webhook", "schedule", "cron"]
+        const triggerTypes = ["manual", "webhook", "schedule", "cron"]
 
         const triggerNode = nodes.find((node) => triggerTypes.some(t => node.type?.toLowerCase().includes(t)))
 
@@ -133,12 +133,11 @@ async function executeInBackground(
             inDegreeMap
         )
 
-        // Determine final status based on node results
         // Execution is only "success" if ALL nodes executed successfully
         const allNodeResults = Object.values(context.nodeResults);
         const hasFailure = allNodeResults.some((result: any) => {
             // Handle both single results and arrays of results
-            if (Array.isArray(result)) {
+            if (Array.isArray(result)) { 
                 return result.some((r: any) => r.success === false);
             }
             return result.success === false;
@@ -208,9 +207,8 @@ async function executeWorkflowGraph(
             }
         });
 
-        // Wait 5 seconds while node shows as "executing" in frontend
         console.log(`Waiting 5 seconds (node: ${node.name})...`);
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise(resolve => setTimeout(resolve, 3000));
 
         let result;
         try {
@@ -225,7 +223,7 @@ async function executeWorkflowGraph(
         }
 
         context.nodeResults[nodeId] = safeClone(result);
-        context.executionOrder.push(nodeId);  // Track execution order
+        context.executionOrder.push(nodeId);  
 
         // Update DB to show this node completed
         console.log(`Completed node: ${node.name}`);
@@ -261,7 +259,6 @@ async function executeWorkflowGraph(
 
 
 //Executes a single node based on its type
-
 async function executeNode(
     node: WorkflowNode,
     context: ExecutionContext,
@@ -325,7 +322,6 @@ function extractCredentialId(node: WorkflowNode): string | null {
         return null;
     }
 
-    // Handle flat structure: { "id": "..." }
     if (node.credentials.id && typeof node.credentials.id === 'string') {
         return node.credentials.id;
     }

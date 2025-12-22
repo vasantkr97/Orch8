@@ -26,7 +26,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 
-app.get("/", (req, res) => {
+app.get("/", (_, res) => {
     console.log("hello health check!");
     res.send("healthy")
 })

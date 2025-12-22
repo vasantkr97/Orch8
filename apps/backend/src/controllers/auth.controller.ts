@@ -4,12 +4,6 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs"
 import "dotenv/config"
 
-type AuthRequest = Request & {
-    user?: {
-        id: string,
-        email: string
-    }
-}
 
 const JWT_SECRET = process.env.JWT_SECRET || "vasanth"
 

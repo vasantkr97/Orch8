@@ -20,7 +20,7 @@ export const createWorkflow = async (req: Request, res: Response) => {
         const workflowNodes = Array.isArray(nodes) ? nodes : []
         const workflowConnections = Array.isArray(connections) ? connections : []
 
-        const webhookToken = triggerType === "WEBHOOK" ? crypto.randomBytes(32).toString('hex') : null
+        const webhookToken = (triggerType === "webhook") ? crypto.randomBytes(32).toString('hex') : null
 
         const workflow = await prisma.workflow.create({
             data: {

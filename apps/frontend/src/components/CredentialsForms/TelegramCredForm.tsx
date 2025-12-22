@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteCredentials, getCredentials, postCredentials } from "../../services/credentials.service";
 
-// Filter credentials by platform
 const getTelegramCredentials = async () => {
   const response = await getCredentials();
   const allCredentials = response.credentials || [];

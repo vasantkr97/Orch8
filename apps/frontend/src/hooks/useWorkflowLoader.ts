@@ -62,6 +62,7 @@ export const useWorkflowLoader = ({
             position,
             data: {
               ...cfg,
+              type,  // Add type so orch8Node can detect webhook
               label: n.name || cfg.label,
               parameters: n.parameters || {},
               credentialsId: n.credentials?.id,
