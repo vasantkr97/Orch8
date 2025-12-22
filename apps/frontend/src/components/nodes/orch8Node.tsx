@@ -1,9 +1,9 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { Handle, Position, type NodeProps, useReactFlow } from '@xyflow/react';
 
 const orch8Node = memo(({ data, selected, id }: NodeProps) => {
     const { deleteElements } = useReactFlow();
-
+    const [copied, setCopied] = useState(false);
 
     const getStatusIcon = () => {
         return (data as any)?.icon || '⚙️'; 
@@ -35,21 +35,40 @@ const orch8Node = memo(({ data, selected, id }: NodeProps) => {
         deleteElements({ nodes: [{ id }] });
     };
 
+    const handleCopyId = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(id);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+    };
+
     return (
         <div className="relative group">
             <div className="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20 flex gap-2">
+                <button
+                    onClick={handleCopyId}
+                    className="hover:scale-110 transition-transform"
+                    title={`Copy ID: ${id}`}
+                >
+                    {copied ? (
+                        <span className="text-[10px] text-green-500 font-medium">Copied!</span>
+                    ) : (
+                        <svg className="w-3.5 h-3.5 text-gray-400 hover:text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+                        </svg>
+                    )}
+                </button>
                 {isWebhook && (
                     <button
                         onClick={copyWebhookUrl}
                         className="hover:scale-110 transition-transform"
                         title={webhookUrl ? "Copy webhook URL" : "Save workflow to generate webhook URL"}
                     >
-                        <svg className={`w-3.5 h-3.5 ${webhookUrl ? 'text-gray-400 hover:text-blue-500' : 'text-gray-600 hover:text-gray-500'}`} fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+                        <svg className={`w-3.5 h-3.5 ${webhookUrl ? 'text-gray-400 hover:text-purple-500' : 'text-gray-600 hover:text-gray-500'}`} fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
                         </svg>
                     </button>
                 )}
-
                 <button
                     onClick={handleDelete}
                     className="hover:scale-110 transition-transform"
@@ -101,7 +120,6 @@ const orch8Node = memo(({ data, selected, id }: NodeProps) => {
                 <div className="text-xs font-medium text-gray-700 leading-tight truncate w-full">
                     {(data as any)?.label}
                 </div>
-
             </div>
         </div>
     );

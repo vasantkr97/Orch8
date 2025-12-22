@@ -18,7 +18,7 @@ interface UseWorkflowActionsProps {
   edges: any[];
   resetWorkflow: () => void;
   setNodes: any;
-  startExecutionTracking?: (executionId: string) => void;
+  startExecutionTracking?: (executionId: string, nodes: any[], edges: any[]) => void;
 }
 
 export const useWorkflowActions = ({
@@ -81,7 +81,7 @@ export const useWorkflowActions = ({
       };
 
       const response = await createWorkflow(workflowData);
-      
+
       if (response.data?.id) {
         setWorkflowId(response.data.id);
         navigate(`/workflow/${response.data.id}`);
@@ -101,10 +101,10 @@ export const useWorkflowActions = ({
 
     try {
       setIsSaving(true);
-      
+
       const backendNodes = nodes.map(node => {
         const backendNode = {
-          id: node.id, 
+          id: node.id,
           name: node.data?.label || node.id,
           type: node.type,
           parameters: node.data?.parameters || {},
@@ -152,7 +152,7 @@ export const useWorkflowActions = ({
         const response = await createWorkflow(workflowData);
         const newId = response.data?.id || response.id;
         const webhookToken = response.data?.webhookToken;
-        
+
         if (newId) {
           setWorkflowId(newId);
           setNodes((nds: any[]) => nds.map((n: any) => ({
@@ -186,7 +186,7 @@ export const useWorkflowActions = ({
       alert('Add a trigger node (Webhook, Manual, or Schedule).');
       return;
     }
-    
+
     if (!workflowId) {
       alert('Save the workflow first.');
       return;
@@ -194,15 +194,15 @@ export const useWorkflowActions = ({
 
     try {
       setIsExecuting(true);
-      
+
       const response = await manualExecute(workflowId);
       const executionId = response.data?.executionId;
-      
+
       console.log(`Execution started: ${executionId}`);
-      
+
       // Start execution progress tracking
       if (executionId && startExecutionTracking) {
-        startExecutionTracking(executionId);
+        startExecutionTracking(executionId, nodes, edges);
       } else {
         // Fallback if no tracking available
         setTimeout(() => {
@@ -215,7 +215,7 @@ export const useWorkflowActions = ({
       alert(`Failed to execute:\n\n${error.response?.data?.error || error.message}`);
       setIsExecuting(false);
     }
-  }, [nodes, workflowId, setIsExecuting, startExecutionTracking]);
+  }, [nodes, edges, workflowId, setIsExecuting, startExecutionTracking]);
 
   const handleWebhookExecute = useCallback(async () => {
     if (!nodes.find(n => n.type === 'webhook')) {

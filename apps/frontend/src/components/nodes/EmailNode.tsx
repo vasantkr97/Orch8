@@ -5,23 +5,46 @@ import { Handle, Position, type NodeProps, useReactFlow } from '@xyflow/react';
 const EmailNode = memo(({ data, selected, id }: NodeProps) => {
   const isTrigger = Boolean((data as any)?.isTrigger);
   const { deleteElements } = useReactFlow();
+  const [copied, setCopied] = useState(false);
   
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     deleteElements({ nodes: [{ id }] });
   };
+
+  const handleCopyId = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(id);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
   
   return (
     <div className="relative group">
-      <button
-        onClick={handleDelete}
-        className="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20"
-        title="Delete node"
-      >
-        <svg className="w-3.5 h-3.5 text-gray-400 hover:text-red-500" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-        </svg>
-      </button>
+      <div className="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20 flex gap-2">
+        <button
+          onClick={handleCopyId}
+          className="hover:scale-110 transition-transform"
+          title={`Copy ID: ${id}`}
+        >
+          {copied ? (
+            <span className="text-[10px] text-green-500 font-medium">Copied!</span>
+          ) : (
+            <svg className="w-3.5 h-3.5 text-gray-400 hover:text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+            </svg>
+          )}
+        </button>
+        <button
+          onClick={handleDelete}
+          className="hover:scale-110 transition-transform"
+          title="Delete node"
+        >
+          <svg className="w-3.5 h-3.5 text-gray-400 hover:text-red-500" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+        </button>
+      </div>
 
       <div
         className={`relative bg-gray-600 w-28 h-24 border-2 transition-all duration-300 flex items-center justify-center ${
@@ -155,6 +178,24 @@ function EmailQuickConfig({ id, data }: any) {
         />
         Use previous node result
       </label>
+
+      {Boolean((local.parameters as any)?.usePreviousResult) && (
+        <div>
+          <label className="block text-[11px] text-gray-400 mb-1">Source Node ID *</label>
+          <input
+            className="w-full border rounded px-2 py-1.5 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-mono"
+            value={(local.parameters as any)?.sourceNodeId || ''}
+            onChange={(e) => setLocal((l) => ({ 
+              ...l, 
+              parameters: { ...(l.parameters || {}), sourceNodeId: e.target.value } 
+            }))}
+            placeholder="Paste node ID here"
+          />
+          <p className="text-[10px] text-gray-500 mt-1">
+            Copy the ID from the source node
+          </p>
+        </div>
+      )}
 
       <div className="flex justify-end gap-2 pt-1">
         <button

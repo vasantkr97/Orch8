@@ -2,18 +2,18 @@ import { prisma } from "@orch8/db";
 import type { ExecutionContext, WorkflowNode } from "../../types/executionTypes";
 import replaceVariable from "../replaceVariable";
 import { GoogleGenAI } from "@google/genai";
+import { getSourceData } from "./getSourceData";
 
 
 export async function executeGemini(
     node: WorkflowNode,
     context: ExecutionContext,
-    credentialId: string,
-    previousNodeId?: string
+    credentialId: string
 ): Promise<any> {
 
     try {
 
-        console.log("Gemini action started...")
+        console.log("Agent started executing...")
 
         if (!credentialId) {
             throw new Error("Gemini credentials not provided. Please select or create credentials.")
@@ -34,7 +34,7 @@ export async function executeGemini(
 
         const apiKeyFromCred = credentialData.apikey;
 
-        let { prompt, model = "gemini-2.5-flash", temperature = 0.7, usePreviousResult, apiKey: apiKeyFromParams } = node.parameters as any
+        let { prompt, model = "gemini-2.5-flash", temperature = 0.7, apiKey: apiKeyFromParams } = node.parameters as any
 
         const apikey = apiKeyFromCred ?? apiKeyFromParams
 
@@ -42,29 +42,15 @@ export async function executeGemini(
             throw new Error("Gemini API key not provided. Select credentials or enter an API key in the node config.");
         }
 
-        if (usePreviousResult && context.data && !prompt) {
-            try {
-                let previousNodeResult: any;
-
-                if (previousNodeId && typeof context.data === "object") {
-                    previousNodeResult = context.data[previousNodeId]
+        // Get source data if usePreviousResult is enabled and no prompt provided
+        if (!prompt) {
+            const sourceData = getSourceData(node, context);
+            if (sourceData) {
+                if (typeof sourceData === "string") {
+                    prompt = sourceData;
+                } else if (typeof sourceData === "object") {
+                    prompt = sourceData.text ?? JSON.stringify(sourceData);
                 }
-                if (!previousNodeResult) {
-                    const preferredNodeId = node.parameters?.previousNodeId
-                    if (preferredNodeId && typeof context.data === "object") {
-                        previousNodeResult = context.data[preferredNodeId];
-                    }
-                }
-
-                if (typeof previousNodeResult === "string") {
-                    prompt = previousNodeResult
-                } else if (previousNodeResult && typeof previousNodeResult === "object") {
-                    prompt = previousNodeResult.text ?? JSON.stringify(previousNodeResult)
-                } else {
-                    prompt = typeof context.data === "string" ? context.data : JSON.stringify(context.data);
-                }
-            } catch (error: any) {
-                console.error("Failed to extract previous result", error);
             }
         }
 
@@ -93,6 +79,7 @@ export async function executeGemini(
 
         const generatedText = response?.text;
         console.log("gemini response:", generatedText)
+        console.log("gemini node execution completed.")
 
         return {
             success: true,

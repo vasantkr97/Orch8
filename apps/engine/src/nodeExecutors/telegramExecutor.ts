@@ -1,13 +1,13 @@
 import { prisma } from "@orch8/db";
 import type { ExecutionContext, WorkflowNode } from "../../types/executionTypes";
 import replaceVariable from "../replaceVariable";
+import { getSourceData } from "./getSourceData";
 
 
 export async function executeTelegram (
     node: WorkflowNode,
     context: ExecutionContext,
-    credentialId: string,
-    previousNodeId?: string
+    credentialId: string
 ): Promise<any> {
     try {
 
@@ -35,31 +35,17 @@ export async function executeTelegram (
 
         const botToken = credentialData.botToken;
 
-        let { chatId, message, parseMode = "HTML", usePreviousResult } = node.parameters as any;
+        let { chatId, message, parseMode = "HTML" } = node.parameters as any;
 
         let effectiveMessage = message || "";
-        if (usePreviousResult && context.data) {
-            let previousNodeResult: any
-            try {
-
-                if (previousNodeId && typeof context.data === "object") {
-                    previousNodeResult = context.data[previousNodeId]
-                }
-
-                if (!previousNodeResult) {
-                    const preferredNodeId = node.parameters?.previousNodeId
-                    if (preferredNodeId && typeof context.data === "object") {
-                        previousNodeResult = context.data[preferredNodeId]
-                    }
-                }
-
-                if (typeof previousNodeResult === "string") {
-                    effectiveMessage = previousNodeResult;
-                } else if (previousNodeResult && typeof previousNodeResult === "object") {
-                    effectiveMessage = previousNodeResult.text ?? JSON.stringify(previousNodeResult)
-                }
-            } catch (error) {
-                console.error("Failed to extract previous node result", error);
+        
+        // Get source data if usePreviousResult is enabled
+        const sourceData = getSourceData(node, context);
+        if (sourceData) {
+            if (typeof sourceData === "string") {
+                effectiveMessage = sourceData;
+            } else if (typeof sourceData === "object") {
+                effectiveMessage = sourceData.text ?? JSON.stringify(sourceData);
             }
         }
 
@@ -92,18 +78,19 @@ export async function executeTelegram (
 
         clearTimeout(timeoutId);
 
-        const result = await response.json()
+        const responseJson: any = await response.json()
 
-        console.log("telegram response:", result)
+        console.log("telegram response:", responseJson.result.text)
+        console.log("telegram node execution completed.")
 
         if (!response.ok) {
-            throw new Error(`Telegram API error: ${result ?? "Unknown error"}`)
+            throw new Error(`Telegram API error: ${responseJson.result.text ?? "Unknown error"}`)
         }
         
 
         return {
             success: true,
-            data: result,
+            data: responseJson,
             message: "Telegram message sent successfully"
         }
     } catch (error:any) {

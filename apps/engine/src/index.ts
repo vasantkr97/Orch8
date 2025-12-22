@@ -94,7 +94,8 @@ async function executeInBackground(
             userId,
             mode,
             data: {},
-            nodeResults: {}
+            nodeResults: {},
+            executionOrder: []  // Track exact execution order for frontend visualization
         }
 
         const triggerTypes = ["trigger", "manual", "webhook", "schedule", "cron"]
@@ -147,7 +148,10 @@ async function executeInBackground(
             where: { id: executionId },
             data: {
                 status: hasFailure ? "failed" : "success",
-                results: safeClone(context.nodeResults),
+                results: {
+                    nodeResults: safeClone(context.nodeResults),
+                    executionOrder: context.executionOrder  // Include execution order for frontend
+                },
                 finishedAt: new Date()
             }
         })
@@ -190,11 +194,29 @@ async function executeWorkflowGraph(
         if (executed.has(nodeId)) continue;
         executed.add(nodeId);
 
+        // Update DB to show this node is now executing
+        console.log(`Starting node: ${node.name}`);
+        await prisma.execution.update({
+            where: { id: context.executionId },
+            data: {
+                results: {
+                    nodeResults: safeClone(context.nodeResults),
+                    executionOrder: context.executionOrder,
+                    currentNode: nodeId,  // Currently executing node
+                    completedNodes: [...context.executionOrder]  // Already completed nodes
+                }
+            }
+        });
+
+        // Wait 5 seconds while node shows as "executing" in frontend
+        console.log(`Waiting 5 seconds (node: ${node.name})...`);
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
         let result;
         try {
             result = await executeNode(node, context);
         } catch (error: any) {
-            result = { 
+            result = {
                 success: false,
                 error: error.message,
                 nodeName: node.name,
@@ -203,17 +225,31 @@ async function executeWorkflowGraph(
         }
 
         context.nodeResults[nodeId] = safeClone(result);
+        context.executionOrder.push(nodeId);  // Track execution order
+
+        // Update DB to show this node completed
+        console.log(`Completed node: ${node.name}`);
+        await prisma.execution.update({
+            where: { id: context.executionId },
+            data: {
+                results: {
+                    nodeResults: safeClone(context.nodeResults),
+                    executionOrder: context.executionOrder,
+                    currentNode: null,  // No node currently executing
+                    completedNodes: [...context.executionOrder]
+                }
+            }
+        });
 
         if (result?.success && result.data !== undefined) {
             context.data[nodeId] = safeClone(result.data);
         }
 
-
         //release children for executeion into queue when all parents finished
         for (const childId of adjacencyMap.get(nodeId) || []) {
             const remaining = (inDegreeMap.get(childId) || 0) - 1;
             inDegreeMap.set(childId, remaining);
-            if (remaining === 0 ) {
+            if (remaining === 0) {
                 const childNode = nodeMap.get(childId);
                 if (childNode) {
                     queue.push(childNode);

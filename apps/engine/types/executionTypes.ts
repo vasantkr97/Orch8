@@ -5,7 +5,7 @@ export interface WorkflowNode {
     parameters: Record<string, any>;
     position: [number, number];
     webhook?: string;
-    credentials?: Record<string, {id: string, name: string}>
+    credentials?: Record<string, { id: string, name: string }>
 }
 
 export interface WorkflowConnection {
@@ -21,5 +21,6 @@ export interface ExecutionContext {
     userId: string;
     mode: "manual" | "webhook";
     data: Record<string, any>;
-    nodeResults: Record<string, any>
+    nodeResults: Record<string, any>;
+    executionOrder: string[];  // Track the order in which nodes are executed
 }
