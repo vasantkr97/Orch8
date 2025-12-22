@@ -13,7 +13,7 @@ const createResendCredential = async (formData: { title: string; apiKey: string;
   return await postCredentials({
     title: formData.title,
     platform: 'resendemail',
-    data: { apiKey: formData.apiKey, fromEmail: formData.fromEmail }
+    data: { apikey: formData.apiKey, fromEmail: formData.fromEmail }
   });
 };
 
@@ -92,7 +92,6 @@ export function ResendCredentials() {
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
           <div className="bg-gray-900 p-6 rounded-xl w-full max-w-md shadow-2xl border border-gray-800">
             <h3 className="text-xl font-semibold mb-4 flex items-center">
-              <span className="text-2xl mr-2">📧</span>
               New Email Credential
             </h3>
             <div className="space-y-4">

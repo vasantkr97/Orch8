@@ -3,7 +3,7 @@ import type { ExecutionContext, WorkflowNode } from "../../types/executionTypes"
 import replaceVariable from "../replaceVariable";
 
 
-export async function executionTelegram (
+export async function executeTelegram (
     node: WorkflowNode,
     context: ExecutionContext,
     credentialId: string,
@@ -38,7 +38,7 @@ export async function executionTelegram (
         let { chatId, message, parseMode = "HTML", usePreviousResult } = node.parameters as any;
 
         let effectiveMessage = message || "";
-        if (usePreviousResult && context.data && !message) {
+        if (usePreviousResult && context.data) {
             let previousNodeResult: any
             try {
 
@@ -72,6 +72,7 @@ export async function executionTelegram (
         //Controlled timeout to avoid handing requests
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10_000);
+        console.log(processedMessage);
 
         const response = await fetch(
             `https://api.telegram.org/bot${botToken}/sendMessage`,

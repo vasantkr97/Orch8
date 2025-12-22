@@ -9,12 +9,12 @@ export const manualExecute = async (req: Request, res: Response) => {
         const userId = req.user?.id;
 
         if (!userId) {
-            return res.status(400).json({ msg: "User not Authenticated"})
+            return res.status(400).json({ msg: "User not Authenticated" })
         }
 
         if (!workflowId) {
             return res.status(404).json({
-                error:  "UNauthorized",
+                error: "UNauthorized",
                 msg: "Workflow ID is required"
             });
         }
@@ -27,7 +27,7 @@ export const manualExecute = async (req: Request, res: Response) => {
         });
 
         if (!workflow) {
-            return res.status(404).json({ 
+            return res.status(404).json({
                 error: "workflow not found or access denied",
             })
         }
@@ -43,7 +43,7 @@ export const manualExecute = async (req: Request, res: Response) => {
         })
     } catch (error) {
         console.error("Error running workflow:", error);
-        res.status(500).json({ error: "Internal server error"})
+        res.status(500).json({ error: "Internal server error" })
     }
 };
 
@@ -53,7 +53,7 @@ export const webhookExecute = async (req: Request, res: Response) => {
         const userId = req.user?.id;
 
         if (!userId) {
-            return res.status(400).json({ msg: "User not Authenticated"})
+            return res.status(400).json({ msg: "User not Authenticated" })
         }
 
         if (!workflowId) {
@@ -71,7 +71,7 @@ export const webhookExecute = async (req: Request, res: Response) => {
         })
 
         if (!workflow) {
-            return res.status(404).json({ error: "Workflow not found or access denied"})
+            return res.status(404).json({ error: "Workflow not found or access denied" })
         }
 
         const executionId = await executeWorkflow(workflowId, userId, "webhook");
@@ -154,7 +154,7 @@ export const publicWebhookExecute = async (req: Request, res: Response) => {
 export const getExecutionById = async (req: Request, res: Response) => {
     try {
         const { executionId } = req.params;
-        const  userId  = req.user?.id;
+        const userId = req.user?.id;
 
         if (!userId) {
             return res.status(400).json({
@@ -176,7 +176,7 @@ export const getExecutionById = async (req: Request, res: Response) => {
         })
 
         if (!execution) {
-            return res.status(404).json({ msg: "Execution not found or Access denied!"})
+            return res.status(404).json({ msg: "Execution not found or Access denied!" })
         }
 
         res.status(200).json({
@@ -225,7 +225,7 @@ export const getAllExecutions = async (req: Request, res: Response) => {
                     }
                 }
             },
-            orderBy: { createdAt: "desc"}
+            orderBy: { createdAt: "desc" }
         });
 
         const total = await prisma.execution.count({
@@ -246,14 +246,14 @@ export const getAllExecutions = async (req: Request, res: Response) => {
     }
 }
 
-export const getWorkflowExecutions = async (req: Request, res: Response)=>{
+export const getWorkflowExecutions = async (req: Request, res: Response) => {
     try {
         const { workflowId } = req.params;
         const { status } = req.query;
         const userId = req.user?.id;
 
         if (!userId) {
-            return res.status(401).json({ msg: "User not Authenticated"})
+            return res.status(401).json({ msg: "User not Authenticated" })
         }
 
         const workflow = await prisma.workflow.findFirst({
@@ -263,8 +263,8 @@ export const getWorkflowExecutions = async (req: Request, res: Response)=>{
             }
         })
 
-        if(!workflow) {
-            return res.status(404).json({ msg: "Workflow not found or access denied"})
+        if (!workflow) {
+            return res.status(404).json({ msg: "Workflow not found or access denied" })
         }
 
         const whereClause: any = {
@@ -322,7 +322,7 @@ export const getExecutionsStatus = async (req: Request, res: Response) => {
         })
 
         if (!execution) {
-            return res.status(404).json({ error: "Execution not found or access denied"})
+            return res.status(404).json({ error: "Execution not found or access denied" })
         }
 
         return res.status(200).json({
@@ -345,10 +345,10 @@ export const stopExecution = async (req: Request, res: Response) => {
         const userId = req.user?.id
 
         if (!userId) {
-            return res.status(401).json({ error: "User not authenticated"})
+            return res.status(401).json({ error: "User not authenticated" })
         }
         if (!executionId) {
-            return res.status(400).json({ error: "Execution ID is required"})
+            return res.status(400).json({ error: "Execution ID is required" })
         }
 
         const execution = await prisma.execution.findFirst({
@@ -359,11 +359,11 @@ export const stopExecution = async (req: Request, res: Response) => {
         })
 
         if (!execution) {
-            return res.status(404).json({ error: "Execution not found or access denied"})
+            return res.status(404).json({ error: "Execution not found or access denied" })
         }
 
         if (execution.status !== "running" && execution.status !== "pending") {
-            return res.status(400).json({ error: "Cannot stop execution that is not running or pending"})
+            return res.status(400).json({ error: "Cannot stop execution that is not running or pending" })
         }
 
         const updatedExecution = await prisma.execution.update({
@@ -400,10 +400,11 @@ export const deleteExecution = async (req: Request, res: Response) => {
         const { executionId } = req.params
         const userId = req.user?.id
 
-        console.log(`Deleting execution ${executionId} for user ${userId}`)
+        console.log(`[DELETE EXECUTION] Request received for executionId: ${executionId}, userId: ${userId}`)
 
         if (!userId) {
-            return res.status(400).json({ error: "User not Authenticated"})
+            console.log('[DELETE EXECUTION] User not authenticated')
+            return res.status(400).json({ error: "User not Authenticated" })
         }
 
         const execution = await prisma.execution.findFirst({
@@ -411,23 +412,24 @@ export const deleteExecution = async (req: Request, res: Response) => {
         })
 
         if (!execution) {
-            return res.status(404).json({ error: "Execution not found or access denied"})
+            console.log(`[DELETE EXECUTION] Execution not found: ${executionId}`)
+            return res.status(404).json({ error: "Execution not found or access denied" })
         }
 
+        console.log(`[DELETE EXECUTION] Found execution, proceeding with deletion`)
         await prisma.execution.delete({
             where: {
-                id: executionId,
-                userId
+                id: executionId
             }
         })
 
+        console.log(`[DELETE EXECUTION] Successfully deleted execution: ${executionId}`)
         return res.status(200).json({
             success: true,
             msg: "Execution deleted successfully"
         })
-    
-    } catch (error: any) {
-        console.error("Delete execution error:", error)
+
+    } catch (error: any) {   
         res.status(500).json({
             success: false,
             error: error.message,

@@ -94,16 +94,20 @@ export default function Executions() {
   };
 
   const handleDeleteExecution = async (executionId: string) => {
-    if (!window.confirm('Are you sure you want to delete this execution?')) {
-      return;
-    }
+    console.log('[DELETE FLOW] Starting delete for execution:', executionId);
+    
+    // TODO: Replace with a proper modal confirmation dialog
+    // For now, removing window.confirm as it's being blocked by the browser
+    console.log('[DELETE FLOW] Proceeding with deletion (confirmation bypassed for testing)');
 
     try {
-      await deleteExecution(executionId);
+      console.log('[DELETE FLOW] Attempting to delete execution:', executionId);
+      const response = await deleteExecution(executionId);
+      console.log('[DELETE FLOW] Delete response:', response);
       alert('Execution deleted successfully');
       fetchExecutions();
     } catch (err: any) {
-      console.error('Error deleting execution:', err);
+      console.error('[DELETE FLOW] Error deleting execution:', err);
       alert(`Failed to delete execution: ${err.response?.data?.error || err.message}`);
     }
   };
@@ -348,10 +352,13 @@ export default function Executions() {
                                   </Button>
                                 )}
                                 <Button
-                                  onClick={() => handleDeleteExecution(execution.id)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteExecution(execution.id);
+                                  }}
                                   variant="ghost"
                                   size="xs"
-                                  className="text-red-400 hover:text-red-300"
+                                  className="text-red-400 hover:text-red-300 bg-red-900/20 border border-red-500"
                                   title="Delete"
                                 >
                                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -34,7 +34,7 @@ export async function executeGemini(
 
         const apiKeyFromCred = credentialData.apikey;
 
-        let { prompt, model = "gemini-1.5-flash", temperature = 0.7, usePreviousResult, apiKey: apiKeyFromParams } = node.parameters as any
+        let { prompt, model = "gemini-2.5-flash", temperature = 0.7, usePreviousResult, apiKey: apiKeyFromParams } = node.parameters as any
 
         const apikey = apiKeyFromCred ?? apiKeyFromParams
 

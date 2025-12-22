@@ -1,8 +1,9 @@
 import { prisma } from "@orch8/db"
 import type { ExecutionContext, WorkflowConnection, WorkflowNode } from "../types/executionTypes";
-import { executionTelegram } from "./nodeExecutors/telegramExecutor";
+import { executeTelegram } from "./nodeExecutors/telegramExecutor";
 import { executeEmailNode } from "./nodeExecutors/emailExecutor";
 import { executeGemini } from "./nodeExecutors/geminiExecutor";
+
 
 
 export async function executeWorkflow(
@@ -108,18 +109,45 @@ async function executeInBackground(
 
         console.log(`Starting from trigger: ${triggerNode.name} (${triggerNode.type})`);
 
-        const results = await executeNodeChain(
+
+        //in degree and adg list
+        const inDegreeMap = new Map<string, number>();
+        const adjacencyMap = new Map<string, string[]>();
+
+        for (const node of nodes) {
+            inDegreeMap.set(node.id, 0);
+            adjacencyMap.set(node.id, [])
+        }
+
+        for (const conn of connections) {
+            adjacencyMap.get(conn.source)?.push(conn.target)
+            inDegreeMap.set(conn.target, (inDegreeMap.get(conn.target) || 0) + 1);
+        }
+
+        await executeWorkflowGraph(
             triggerNode,
             nodes,
-            connections,
-            context
+            context,
+            adjacencyMap,
+            inDegreeMap
         )
+
+        // Determine final status based on node results
+        // Execution is only "success" if ALL nodes executed successfully
+        const allNodeResults = Object.values(context.nodeResults);
+        const hasFailure = allNodeResults.some((result: any) => {
+            // Handle both single results and arrays of results
+            if (Array.isArray(result)) {
+                return result.some((r: any) => r.success === false);
+            }
+            return result.success === false;
+        });
 
         await prisma.execution.update({
             where: { id: executionId },
             data: {
-                status: "success",
-                results: safeClone(results),
+                status: hasFailure ? "failed" : "success",
+                results: safeClone(context.nodeResults),
                 finishedAt: new Date()
             }
         })
@@ -131,10 +159,8 @@ async function executeInBackground(
                 status: "failed",
                 results: {
                     error: error.message,
-                    errorType: error.constructor.name,
                     stack: error.stack,
                     timestamp: new Date().toISOString(),
-                    executionId
                 },
                 finishedAt: new Date()
             }
@@ -143,116 +169,58 @@ async function executeInBackground(
 }
 
 
-async function executeNodeChain(
-    currentNode: WorkflowNode,
+async function executeWorkflowGraph(
+    triggerNode: WorkflowNode,
     allNodes: WorkflowNode[],
-    connections: WorkflowConnection[],
     context: ExecutionContext,
-    previousNodeId?: string,
-    visitedNodes?: Set<string>
+    adjacencyMap: Map<string, string[]>,
+    inDegreeMap: Map<string, number>,
 ): Promise<any> {
 
-    visitedNodes = visitedNodes ?? new Set<string>()
+    const nodeMap = new Map(allNodes.map(n => [n.id, n]));
+    const queue: WorkflowNode[] = [];
+    const executed = new Set<string>();
 
-    const currentNodeId = (currentNode as any).id //|| currentNode.name || `node_${Date.now()}`
+    queue.push(triggerNode);
 
-    if (!currentNodeId) {
-        throw new Error(`Node "${currentNode.name}" is missing an id`)
-    }
+    while (queue.length > 0) {
+        const node = queue.shift()!;
+        const nodeId = node.id;
 
-    if (visitedNodes.has(currentNodeId)) {
-        console.warn(`Cycle detected: Node ${currentNode.name} (${currentNodeId}) already visited. ` + `Skipping to prevent infinite loop.`)
-        return context.nodeResults[currentNodeId];
-    }
+        if (executed.has(nodeId)) continue;
+        executed.add(nodeId);
 
-    visitedNodes.add(currentNodeId)
-
-    let nodeResult;
-
-    try {
-        console.log(`[DEBUG] Executing node: ${currentNode.name}, Type: ${currentNode.type}, ID: ${currentNodeId}`);
-        nodeResult = await executeNode(currentNode, context, previousNodeId);
-    } catch (error: any) {
-        console.error(`[DEBUG] Execution failed for node ${currentNode.name}:`, error)
-        nodeResult = {
-            success: false,
-            error: error.message,
-            nodeName: currentNode.name,
-            timestamp: new Date().toISOString()
-        };
-    }
-
-    const safeNodeResult = safeClone(nodeResult)
-
-    //Improved duplicate name handling with array structure
-    if (context.nodeResults[currentNodeId]) {
-        const existing = context.nodeResults[currentNodeId]
-        context.nodeResults[currentNodeId] = Array.isArray(existing) ? [...existing, safeNodeResult] : [existing, safeNodeResult];
-    } else {
-        context.nodeResults[currentNodeId] = safeNodeResult;
-    }
-
-
-    if (nodeResult?.success && nodeResult.data !== undefined) {
-        const key = (currentNode as any).id || currentNode.name;
-        if (!context.data) {
-            context.data = {}
+        let result;
+        try {
+            result = await executeNode(node, context);
+        } catch (error: any) {
+            result = { 
+                success: false,
+                error: error.message,
+                nodeName: node.name,
+                timestamp: new Date().toISOString()
+            }
         }
-        (context.data as any)[key] = safeClone(nodeResult.data);
+
+        context.nodeResults[nodeId] = safeClone(result);
+
+        if (result?.success && result.data !== undefined) {
+            context.data[nodeId] = safeClone(result.data);
+        }
+
+
+        //release children for executeion into queue when all parents finished
+        for (const childId of adjacencyMap.get(nodeId) || []) {
+            const remaining = (inDegreeMap.get(childId) || 0) - 1;
+            inDegreeMap.set(childId, remaining);
+            if (remaining === 0 ) {
+                const childNode = nodeMap.get(childId);
+                if (childNode) {
+                    queue.push(childNode);
+                }
+            }
+        }
     }
-
-    //finding next node to execute
-    const nextEdges = connections.filter(conn =>
-        conn.source === currentNodeId
-    )
-
-    //return if no next nodes
-    if (nextEdges.length === 0) {
-        console.log(`End of chain reached at: ${currentNode.name}`)
-        return nodeResult;
-    }
-
-    const targetKeys = [...new Set(nextEdges.map(conn => conn.target))]
-    const nextNodes = allNodes.filter(node => {
-        const nodeId = (node as any).id;
-        return (nodeId && targetKeys.includes(nodeId)) || targetKeys.includes(node.name)
-    })
-
-    if (!nextNodes.length) {
-        console.log(`Branching to `)
-        return nodeResult;
-    }
-
-    for (const nextNode of nextNodes) {
-
-        //create new Set for each branch to allow parallel paths
-        const branchVisited = new Set(visitedNodes)
-
-        //real parallel execution
-        // await Promise.all(
-        //     nextNodes.map(nextNode => executeNodeChain(
-        //         nextNode,
-        //         allNodes,
-        //         connections,
-        //         context,
-        //         currentNodeId,
-        //         branchVisited
-        //     ))
-        // )
-
-        await executeNodeChain(
-            nextNode,
-            allNodes,
-            connections,
-            context,
-            currentNodeId,
-            branchVisited
-        );
-
-    }
-
-    return context.nodeResults;
-
 }
 
 
@@ -261,7 +229,6 @@ async function executeNodeChain(
 async function executeNode(
     node: WorkflowNode,
     context: ExecutionContext,
-    previousNodeId?: string
 ): Promise<any> {
 
     if (!node.type) {
@@ -285,26 +252,26 @@ async function executeNode(
             nodeType: node.type
         }
     } else {
-        
+
         const credentialId = extractCredentialId(node)
         const nodeType = node.type.toLowerCase();
 
         if (nodeType.includes("telegram")) {
 
-            result = await executionTelegram(node, context, credentialId ?? "", previousNodeId);
-        
+            result = await executeTelegram(node, context, credentialId ?? "");
+
         } else if (nodeType.includes("email")) {
-            
-            result = await executeEmailNode(node, context, credentialId ?? "", previousNodeId);
-        
+
+            result = await executeEmailNode(node, context, credentialId ?? "");
+
         } else if (nodeType.includes("gemini")) {
-            
-            result = await executeGemini(node, context, credentialId ?? "", previousNodeId);
-        
+
+            result = await executeGemini(node, context, credentialId ?? "");
+
         } else {
-            
+
             throw new Error(`Unsupported node type: ${node.type}`)
-        
+
         }
     }
 

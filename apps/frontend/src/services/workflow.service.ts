@@ -12,12 +12,12 @@ export const getallWorkflows = async () => {
 }
 
 export const getWorkflowById = async (workflowId: string) => {
-    const { data } = await axiosInstance.get(`/workflow/getWorkflowById/${workflowId}`)
+    const { data } = await axiosInstance.get(`/workflows/getWorkflowById/${workflowId}`)
     return data;
 }
 
 export const updateWorkflow = async (workflowId: string, updateWorkflowData: UpdateWorkflowData) => {
-    const { data } = await axiosInstance.put(`/workflow/updateWorkflow/${workflowId}`, { updateWorkflowData })
+    const { data } = await axiosInstance.put(`/workflows/updateWorkflow/${workflowId}`, updateWorkflowData)
     return data;
 }
 

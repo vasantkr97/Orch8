@@ -75,7 +75,7 @@ export const useWorkflowActions = ({
       const workflowData = {
         title: 'Untitled Workflow',
         isActive: false,
-        triggerType: 'MANUAL',
+        triggerType: 'manual',
         nodes: [],
         connections: []
       };
@@ -124,7 +124,7 @@ export const useWorkflowActions = ({
       }));
 
       const triggerNode = nodes.find(n => getNodeConfig(n.type || '').isTrigger);
-      const triggerType = triggerNode?.type?.toUpperCase() || 'MANUAL';
+      const triggerType = triggerNode?.type || 'manual';
 
       const workflowData = {
         title: workflowTitle,
@@ -215,7 +215,7 @@ export const useWorkflowActions = ({
       alert(`Failed to execute:\n\n${error.response?.data?.error || error.message}`);
       setIsExecuting(false);
     }
-  }, [nodes, workflowId, setIsExecuting]);
+  }, [nodes, workflowId, setIsExecuting, startExecutionTracking]);
 
   const handleWebhookExecute = useCallback(async () => {
     if (!nodes.find(n => n.type === 'webhook')) {

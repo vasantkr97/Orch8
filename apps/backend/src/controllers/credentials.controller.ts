@@ -4,15 +4,15 @@ import type { Request, Response } from "express"
 
 export const postCredentials = async (req: Request, res: Response) => {
     try {
-        const userId  = req.user?.id;
+        const userId = req.user?.id;
         const { title, platform, data } = req.body
 
         if (!userId) {
-            return res.status(400).json({ msg: "UserId required"});
+            return res.status(400).json({ msg: "UserId required" });
         }
 
         if (!title || !platform || !data) {
-            return res.status(400).json({ msg: "All credentials fields are required"});
+            return res.status(400).json({ msg: "All credentials fields are required" });
         }
 
         const credentials = await prisma.credentials.create({
@@ -30,7 +30,7 @@ export const postCredentials = async (req: Request, res: Response) => {
         })
     } catch (error) {
         console.log("Error creating credentials:", error);
-        return res.status(500).json({ msg: "Internal server error"})
+        return res.status(500).json({ msg: "Internal server error" })
     }
 }
 
@@ -38,13 +38,13 @@ export const getCredentialById = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const userId = req.user?.id;
-        
+
         if (!userId) {
-            return res.status(400).json({ msg: "User not authenticated"})
+            return res.status(400).json({ msg: "User not authenticated" })
         }
 
         if (!id) {
-            return res.status(400).json({ msg: "Credential Id required"})
+            return res.status(400).json({ msg: "Credential Id required" })
         }
 
         const credentialById = await prisma.credentials.findFirst({
@@ -60,7 +60,7 @@ export const getCredentialById = async (req: Request, res: Response) => {
         })
     } catch (error) {
         console.log("Error fetching credentials by id:", error);
-        return res.status(500).json({ msg: "Internal server error"})
+        return res.status(500).json({ msg: "Internal server error" })
     }
 }
 
@@ -69,7 +69,7 @@ export const getCredentials = async (req: Request, res: Response) => {
         const userId = req.user?.id;
 
         if (!userId) {
-            return res.status(400).json({ msg: "User not found."})
+            return res.status(400).json({ msg: "User not found." })
         }
 
         const credentials = await prisma.credentials.findMany({
@@ -91,22 +91,22 @@ export const getCredentials = async (req: Request, res: Response) => {
         })
     } catch (error) {
         console.error("No credentials found!", error);
-        res.status(500).json({ msg: "Internal server Error"});
+        res.status(500).json({ msg: "Internal server Error" });
     }
 }
 
-export const updateCredentials =  async (req: Request, res: Response) => {
+export const updateCredentials = async (req: Request, res: Response) => {
     try {
         const userId = req.user?.id;
         const { id } = req.params;
         const { title, platform, data } = req.body;
 
         if (!userId) {
-            return res.status(400).json({ msg: "User not authenticated"});
+            return res.status(400).json({ msg: "User not authenticated" });
         }
 
         if (!id) {
-            return res.status(400).json({ msg: "Credentials Id is required"})
+            return res.status(400).json({ msg: "Credentials Id is required" })
         }
 
         const existing = await prisma.credentials.findFirst({
@@ -117,7 +117,7 @@ export const updateCredentials =  async (req: Request, res: Response) => {
         })
 
         if (!existing) {
-            return res.status(404).json({ msg: "credentials not found or not owned by user"})
+            return res.status(404).json({ msg: "credentials not found or not owned by user" })
         }
 
 
@@ -148,11 +148,11 @@ export const deleteCredentials = async (req: Request, res: Response) => {
         const { id } = req.params;
 
         if (!userId) {
-            return res.status(400).json({ msg: "credentials ID is required"})
+            return res.status(400).json({ msg: "credentials ID is required" })
         }
 
         if (!id) {
-            return res.status(400).json({ msg:  "Credentials Id is Requried"})
+            return res.status(400).json({ msg: "Credentials Id is Requried" })
         }
 
         const existing = await prisma.credentials.findFirst({
@@ -171,7 +171,6 @@ export const deleteCredentials = async (req: Request, res: Response) => {
         const credentials = await prisma.credentials.delete({
             where: {
                 id,
-                userId
             }
         })
 
@@ -181,6 +180,6 @@ export const deleteCredentials = async (req: Request, res: Response) => {
         })
     } catch (error) {
         console.error("Error deleting credentials:", error);
-        return res.status(500).json({ msg: "Internal server error"})
+        return res.status(500).json({ msg: "Internal server error" })
     }
 }

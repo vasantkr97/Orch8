@@ -4,16 +4,16 @@ import crypto from "crypto"
 
 
 export const createWorkflow = async (req: Request, res: Response) => {
-    try { 
+    try {
         const userId = req.user?.id
         const { title, isActive, triggerType, nodes, connections } = req.body
-        
+
         if (!userId) {
-            return res.status(400).json({ msg: "User not Authenticated"})
+            return res.status(400).json({ msg: "User not Authenticated" })
         }
-        
+
         if (!title || !triggerType || !nodes || !connections) {
-            return res.status(400).json({ msg: "Missing required fields"})
+            return res.status(400).json({ msg: "Missing required fields" })
         }
 
         //Ensure nodes and connections are arrays
@@ -56,7 +56,7 @@ export const getallWorkflows = async (req: Request, res: Response) => {
         const userId = req.user?.id
 
         if (!userId) {
-            return res.status(400).json({ msg: "User not Authenticated"})
+            return res.status(400).json({ msg: "User not Authenticated" })
         }
 
         const workflows = await prisma.workflow.findMany({
@@ -65,13 +65,13 @@ export const getallWorkflows = async (req: Request, res: Response) => {
             },
             include: {
                 executions: {
-                    select: { id: true, status: true, mode: true, startedAt: true, finishedAt: true},
-                    orderBy: { createdAt: "desc"},
+                    select: { id: true, status: true, mode: true, startedAt: true, finishedAt: true },
+                    orderBy: { createdAt: "desc" },
                     take: 10
                 },
                 _count: { select: { executions: true } }
             },
-            orderBy: { updatedAt: "desc"}
+            orderBy: { updatedAt: "desc" }
         })
 
         res.status(200).json({
@@ -94,13 +94,13 @@ export const getWorkflowById = async (req: Request, res: Response) => {
     try {
         const { workflowId } = req.params;
         const userId = req.user?.id
-        
+
         if (!userId) {
-            return res.status(400).json({ msg: "User not Authenticated"})
+            return res.status(400).json({ msg: "User not Authenticated" })
         }
 
         if (!workflowId) {
-            return res.status(400).json({ msg: "Workflow ID is required"})
+            return res.status(400).json({ msg: "Workflow ID is required" })
         }
 
         const workflow = await prisma.workflow.findUnique({
@@ -125,14 +125,14 @@ export const getWorkflowById = async (req: Request, res: Response) => {
         })
 
         if (!workflow) {
-            return res.status(404).json({ error: "Workflow not found"})
+            return res.status(404).json({ error: "Workflow not found" })
         }
 
         const nodes = workflow.nodes as any;
         const connections = workflow.connections as any;
 
         if (!Array.isArray(nodes) || !Array.isArray(connections)) {
-            return res.status(400).json({ error: "Invalid workflow data"})
+            return res.status(400).json({ error: "Invalid workflow data" })
         }
 
         res.status(200).json({
@@ -153,21 +153,17 @@ export const getWorkflowById = async (req: Request, res: Response) => {
 export const updateWorkflow = async (req: Request, res: Response) => {
     try {
         const userId = req.user?.id
-        const { workflowId }= req.params;
+        const { workflowId } = req.params;
 
         if (!userId) {
-            return res.status(400).json({ msg: "User not Authenticated"})
+            return res.status(400).json({ msg: "User not Authenticated" })
         }
 
         if (!workflowId) {
-            return res.status(400).json({ msg: "Workflow ID is required"})
+            return res.status(400).json({ msg: "Workflow ID is required" })
         }
 
         const { title, isActive, nodes, triggerType, connections } = req.body;
-
-        if (!title || !isActive || !nodes || !triggerType || !connections) {
-            return res.status(400).json({ msg: "Missing required fields"})
-        }
 
         const existingWorkflow = await prisma.workflow.findFirst({
             where: {
@@ -177,14 +173,14 @@ export const updateWorkflow = async (req: Request, res: Response) => {
         })
 
         if (!existingWorkflow) {
-            return res.status(404).json({ error: "Workflow not found"})
+            return res.status(404).json({ error: "Workflow not found" })
         }
 
         const updateData: any = {}
 
-        if ( title !== undefined) updateData.title = title
-        if ( isActive !== undefined) updateData.isActive = isActive;
-        if (triggerType !== undefined){
+        if (title !== undefined) updateData.title = title
+        if (isActive !== undefined) updateData.isActive = isActive;
+        if (triggerType !== undefined) {
             updateData.triggerType = triggerType;
             //Generate webhook token if changing to webhook and does not have one
             if (triggerType === "webhook" && !(existingWorkflow as any).webhookToken) {
@@ -221,11 +217,11 @@ export const deleteWorkflow = async (req: Request, res: Response) => {
         const userId = req.user?.id
 
         if (!userId) {
-            return res.status(400).json({ msg: "User not Authenticated"})
+            return res.status(400).json({ msg: "User not Authenticated" })
         }
 
         if (!workflowId) {
-            return res.status(400).json({ msg: "Workflow ID is required"})
+            return res.status(400).json({ msg: "Workflow ID is required" })
         }
 
         const workflow = await prisma.workflow.findFirst({
@@ -236,7 +232,7 @@ export const deleteWorkflow = async (req: Request, res: Response) => {
         })
 
         if (!workflow) {
-            return res.status(404).json({ error: "Workflow not found"})
+            return res.status(404).json({ error: "Workflow not found" })
         }
 
         await prisma.workflow.delete({
@@ -254,7 +250,7 @@ export const deleteWorkflow = async (req: Request, res: Response) => {
             error: error.message,
             msg: "Internal server error while deleting workflow"
         })
-    } 
+    }
 }
 
 

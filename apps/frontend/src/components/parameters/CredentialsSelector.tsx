@@ -58,13 +58,6 @@ export function CredentialsSelector({
     return platform === type || platform.includes(type) || type.includes(platform);
   });
 
-  console.log('CredentialsSelector Debug:', {
-    credentialType,
-    responseRaw: response,
-    allCredentials,
-    filteredCredentials: credentials,
-    filteringBy: credentialType.toLowerCase()
-  });
 
   const handleCreateCredential = () => {
     if (!formData.title) return;
@@ -81,11 +74,11 @@ export function CredentialsSelector({
       credentialData.data = { botToken: formData.botToken };
     } else if (credentialType.toLowerCase() === 'gemini') {
       if (!formData.apiKey) return;
-      credentialData.data = { apiKey: formData.apiKey };
+      credentialData.data = { apikey: formData.apiKey };
     } else if (credentialType.toLowerCase() === 'resendemail') {
       if (!formData.apiKey || !formData.fromEmail) return;
       credentialData.data = {
-        apiKey: formData.apiKey,
+        apikey: formData.apiKey,
         fromEmail: formData.fromEmail
       };
     }

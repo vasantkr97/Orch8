@@ -28,11 +28,11 @@ export async function executeEmailNode(
 
         const credentialData = credentials.data as { apikey?: string }
 
-        if (!credentialData.apikey) {
+        const apikey = credentialData.apikey;
+
+        if (!apikey) {
             throw new Error("Resend API key not found in credentials");
         }
-
-        const apikey = credentialData.apikey;
 
         let { from, to, subject, html, text, usePreviousResult } = node.parameters as any;
         if (usePreviousResult && context.data) {
