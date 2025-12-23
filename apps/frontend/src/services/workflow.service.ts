@@ -7,7 +7,7 @@ export const createWorkflow = async (workflowData: CreateWorkflowData) => {
 }
 
 export const getallWorkflows = async () => {
-    const { data } = await axiosInstance.get("/workflows/getallworkflows")
+    const { data } = await axiosInstance.get("/workflows/getallWorkflows")
     return data;
 }
 

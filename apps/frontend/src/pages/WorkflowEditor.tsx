@@ -4,10 +4,10 @@ import '@xyflow/react/dist/style.css';
 
 import { edgeTypes } from "../components/edges/edgeTypes";
 
-import { useWorkflowState } from "../hooks/useWorkflowState";
-import { useWorkflowLoader } from "../hooks/useWorkflowLoader";
-import { useExecutionProgress } from "../hooks/useExecutionProgress";
-import { useWorkflowActions } from "../hooks/useWorkflowAction";
+import { useWorkflowState } from "../hooks/workflowHooks/useWorkflowState";
+import { useWorkflowLoader } from "../hooks/workflowHooks/useWorkflowLoader";
+import { useExecutionProgress } from "../hooks/executionHooks/useExecutionProgress";
+import { useWorkflowActions } from "../hooks/workflowHooks/useWorkflowAction";
 import { useNodeActions } from "../hooks/useNodeAction";
 import WorkflowToolbar from "../components/WorkflowToolbar";
 import { nodeTypes } from "../components/nodes/nodeTypes";
@@ -28,7 +28,7 @@ export default function WorkflowEditor() {
     const executingNodes = state.nodes.filter((n: any) => n.data?.isExecuting);
     const executedNodes = state.nodes.filter((n: any) => n.data?.isExecuted);
     const errorNodes = state.nodes.filter((n: any) => n.data?.hasError);
-    
+
     if (executingNodes.length > 0 || executedNodes.length > 0 || errorNodes.length > 0) {
       console.log('🎯 Node states:', {
         executing: executingNodes.map((n: any) => n.data?.label || n.id),
@@ -86,7 +86,7 @@ export default function WorkflowEditor() {
         <div className="text-center">
           <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-500/50 animate-pulse">
             <svg className="w-10 h-10 text-white" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M8 4h3v7H8V4zm5 0h3v10h-3V4zM8 13h3v7H8v-7z"/>
+              <path d="M8 4h3v7H8V4zm5 0h3v10h-3V4zM8 13h3v7H8v-7z" />
             </svg>
           </div>
           <p className="text-white text-lg font-semibold">Loading workflow...</p>
@@ -110,7 +110,7 @@ export default function WorkflowEditor() {
           isSaving={state.isSaving}
           isExecuting={state.isExecuting}
         />
-        
+
         <div className="flex-1 relative">
           <button
             onClick={handleAddNodeClick}
@@ -162,7 +162,7 @@ export default function WorkflowEditor() {
                   strokeOpacity: 0.8,
                 },
               }}
-              defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+              defaultViewport={{ x: 0, y: 0, zoom: 0.6 }}
               minZoom={0.1}
               maxZoom={4}
               deleteKeyCode={['Backspace', 'Delete']}
@@ -170,15 +170,15 @@ export default function WorkflowEditor() {
               nodesDraggable={true}
               nodesConnectable={true}
             >
-              <Background 
-                variant={BackgroundVariant.Dots} 
-                gap={20} 
-                size={1} 
-                style={{ backgroundColor: '#0a0e1a' }} 
+              <Background
+                variant={BackgroundVariant.Dots}
+                gap={20}
+                size={1}
+                style={{ backgroundColor: '#0a0e1a' }}
               />
-              <Controls 
+              <Controls
                 position="bottom-left"
-                style={{ 
+                style={{
                   display: 'flex',
                   gap: '8px',
                 }}
@@ -192,17 +192,17 @@ export default function WorkflowEditor() {
                   return '#6b7280';
                 }}
                 position="bottom-right"
-                style={{ 
-                  height: 140, 
-                  width: 200, 
-                  backgroundColor: '#1f2937', 
-                  border: '1px solid #374151', 
+                style={{
+                  height: 140,
+                  width: 200,
+                  backgroundColor: '#1f2937',
+                  border: '1px solid #374151',
                   borderRadius: '12px',
                   boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)'
                 }}
                 className="backdrop-blur-sm"
               />
-              
+
               {/* Empty State - Start Card */}
               {state.nodes.length === 0 && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
@@ -228,7 +228,7 @@ export default function WorkflowEditor() {
           isVisible={showNodeSelector}
           onNodeSelect={(nodeType) => {
             nodeActions.handleNodeSelect(nodeType);
-            setShowNodeSelector(false);
+            // Keep the panel open so user can add more nodes
           }}
           onClose={() => setShowNodeSelector(false)}
           hasTrigger={state.nodes.some((n: any) => n?.data?.isTrigger === true)}

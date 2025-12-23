@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getWorkflowById } from '../services/workflow.service';
-import { getNodeConfig } from '../components/nodes/nodeTypes';
+import { getWorkflowById } from '../../services/workflow.service';
+import { getNodeConfig } from '../../components/nodes/nodeTypes';
 
 
 interface UseWorkflowLoaderProps {
@@ -83,6 +83,21 @@ export const useWorkflowLoader = ({
         setNodes(mappedNodes);
         setEdges(mappedEdges);
 
+        // Save to localStorage so /dashboard shows the last viewed workflow
+        const WORKFLOW_STORAGE_KEY = 'orch8_current_workflow';
+        try {
+          localStorage.setItem(WORKFLOW_STORAGE_KEY, JSON.stringify({
+            workflowId: wf.id,
+            workflowTitle: wf.title || 'Untitled Workflow',
+            isWorkflowActive: wf.isActive || false,
+            nodes: mappedNodes,
+            edges: mappedEdges,
+          }));
+          console.log('📥 Saved URL workflow to localStorage:', wf.title);
+        } catch (e) {
+          console.error('Error saving to localStorage:', e);
+        }
+
         console.log('Workflow loaded successfully');
       } catch (error: any) {
         console.error('Error loading workflow:', error);
@@ -96,5 +111,5 @@ export const useWorkflowLoader = ({
     };
 
     loadWorkflow();
-  }, [urlWorkflowId]); 
+  }, [urlWorkflowId]);
 };

@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { updateWorkflow } from '../services/workflow.service';
-import { manualExecute, webhookExecute } from '../services/execution.service';
-import { getNodeConfig } from '../components/nodes/nodeTypes';
-import { createWorkflow } from '../services/workflow.service';
+import { updateWorkflow } from '../../services/workflow.service';
+import { manualExecute, webhookExecute } from '../../services/execution.service';
+import { getNodeConfig } from '../../components/nodes/nodeTypes';
+import { createWorkflow } from '../../services/workflow.service';
 
 interface UseWorkflowActionsProps {
   workflowId: string | null;

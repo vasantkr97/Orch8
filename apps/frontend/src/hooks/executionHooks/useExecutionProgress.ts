@@ -1,5 +1,5 @@
 import { useCallback, useRef } from 'react';
-import {  getExecutionById } from '../services/execution.service';
+import { getExecutionById } from '../../services/execution.service';
 
 interface UseExecutionProgressProps {
   setNodes: (updater: (nodes: any[]) => any[]) => void;
@@ -61,10 +61,10 @@ export const useExecutionProgress = ({ setNodes, setIsExecuting }: UseExecutionP
       // Get detailed execution info (includes results with currentNode)
       const detailsResponse = await getExecutionById(executionId);
       const execution = detailsResponse.data;
-      
+
       const status = execution?.status;
       const results = execution?.results || {};
-      
+
       console.log('📊 Polling progress:', {
         status,
         currentNode: results.currentNode,
@@ -88,7 +88,7 @@ export const useExecutionProgress = ({ setNodes, setIsExecuting }: UseExecutionP
             const isInOrder = results.executionOrder?.includes(node.id);
             const nodeResult = results.nodeResults?.[node.id];
             const hasError = nodeResult?.success === false;
-            
+
             return {
               ...node,
               data: {
@@ -108,10 +108,10 @@ export const useExecutionProgress = ({ setNodes, setIsExecuting }: UseExecutionP
         setNodes((nodes: any[]) =>
           nodes.map((node: any) => {
             const nodeResult = results.nodeResults?.[node.id];
-            const isCompleted = results.completedNodes?.includes(node.id) || 
-                               results.executionOrder?.includes(node.id);
+            const isCompleted = results.completedNodes?.includes(node.id) ||
+              results.executionOrder?.includes(node.id);
             const hasError = nodeResult?.success === false;
-            
+
             return {
               ...node,
               data: {
@@ -171,7 +171,7 @@ export const useExecutionProgress = ({ setNodes, setIsExecuting }: UseExecutionP
     // Poll for progress - start immediately and then every 500ms for real-time updates
     const pollForProgress = async () => {
       if (!currentExecutionIdRef.current) return;
-      
+
       const completed = await pollExecutionProgress(currentExecutionIdRef.current);
       if (completed) {
         if (pollingIntervalRef.current) {

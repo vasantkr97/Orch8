@@ -7,17 +7,17 @@ export interface NodeData {
 }
 
 export type NodeType =
-| 'trigger'
-| 'email'
-| 'telegram'
-| 'gemini'
-| 'webhook'
+    | 'trigger'
+    | 'email'
+    | 'telegram'
+    | 'gemini'
+    | 'webhook'
 
 export interface NodeDefinition {
     type: NodeType;
     name: string;
     category: 'trigger' | 'action' | 'logic';
-    icon: string;
+    icon: React.ReactNode;
     color: string;
     description: string;
     parameters: NodeParameter[];
