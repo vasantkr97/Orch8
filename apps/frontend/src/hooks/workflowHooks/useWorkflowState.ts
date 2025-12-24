@@ -1,8 +1,8 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNodesState, useEdgesState } from '@xyflow/react';
 import { useLocation } from 'react-router-dom';
 
-const WORKFLOW_STORAGE_KEY = 'orch8_current_workflow';
+const STORAGE_PREFIX = 'orch8_workflow_';
 
 export const useWorkflowState = () => {
   const location = useLocation();
@@ -12,96 +12,113 @@ export const useWorkflowState = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
   const [isLoadingWorkflow, setIsLoadingWorkflow] = useState(false);
-  const [hasLoadedFromStorage, setHasLoadedFromStorage] = useState(false);
 
   const [nodes, setNodesState, onNodesChange] = useNodesState([]);
   const [edges, setEdgesState, onEdgesChange] = useEdgesState([]);
 
-  // Check if we're on a URL-based workflow route
-  const isUrlWorkflow = location.pathname.includes('/workflow/') && location.pathname.split('/workflow/')[1];
+  // Determine URL mode ONCE per route
+  const urlWorkflowId = location.pathname.includes('/workflow/') 
+    ? location.pathname.split('/workflow/')[1]?.split('?')[0]  // Handle query params
+    : null;
 
-  // Load from localStorage only once and only if not on URL workflow
+  // Track if draft has been loaded (only relevant when NOT on URL route)
+  const draftLoaded = useRef(false);
+
+  const getStorageKey = (id: string | null) => `${STORAGE_PREFIX}${id || 'draft'}`;
+
+  // Load Draft ONLY when:
+  // 1. We are NOT on a URL-based workflow route
+  // 2. We haven't loaded the draft yet
   useEffect(() => {
-    if (hasLoadedFromStorage || isUrlWorkflow) return;
+    // CRITICAL: If we are on a URL workflow, do NOT touch draft at all
+    if (urlWorkflowId) {
+      return;
+    }
+
+    // Only load draft once
+    if (draftLoaded.current) {
+      return;
+    }
 
     try {
-      const stored = localStorage.getItem(WORKFLOW_STORAGE_KEY);
+      const draftKey = getStorageKey(null);
+      const stored = localStorage.getItem(draftKey);
       if (stored) {
         const data = JSON.parse(stored);
-        console.log('📥 Loading workflow from localStorage:', data.workflowTitle);
-
-        if (data.workflowId) setWorkflowId(data.workflowId);
+        console.log('📥 Loading Draft from localStorage');
         if (data.workflowTitle) setWorkflowTitle(data.workflowTitle);
-        if (data.isWorkflowActive !== undefined) setIsWorkflowActive(data.isWorkflowActive);
-        if (data.nodes && data.nodes.length > 0) setNodesState(data.nodes);
-        if (data.edges && data.edges.length > 0) setEdgesState(data.edges);
+        if (data.nodes) setNodesState(data.nodes);
+        if (data.edges) setEdgesState(data.edges);
       }
-    } catch (error) {
-      console.error('Error loading from localStorage:', error);
+    } catch (e) {
+      console.error('Error loading draft', e);
     } finally {
-      setHasLoadedFromStorage(true);
+      draftLoaded.current = true;
     }
-  }, [hasLoadedFromStorage, isUrlWorkflow]);
+  }, [urlWorkflowId, setNodesState, setEdgesState]);
 
-  // Save to localStorage (only when not on URL workflow)
-  const saveToStorage = useCallback((data: any) => {
-    if (isUrlWorkflow) return; // Don't save when viewing URL-based workflow
 
-    try {
-      localStorage.setItem(WORKFLOW_STORAGE_KEY, JSON.stringify(data));
-      console.log('Saved to localStorage:', data.workflowTitle);
-    } catch (error) {
-      console.error('Error saving to localStorage:', error);
-    }
-  }, [isUrlWorkflow]);
+  // Persistence Logic
+  const saveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  // Track if we have saved at least once (to avoid saving empty initial state)
+  const hasSavedOnce = useRef(false);
 
-  // Smart setters that save to localStorage when appropriate
-  const setWorkflowIdWithStorage = useCallback((id: string | null) => {
-    setWorkflowId(id);
-    if (!isUrlWorkflow) {
-      saveToStorage({ workflowId: id, workflowTitle, isWorkflowActive, nodes, edges });
-    }
-  }, [workflowTitle, isWorkflowActive, nodes, edges, saveToStorage, isUrlWorkflow]);
+  const saveToStorage = useCallback((id: string | null, data: {
+    workflowId: string | null;
+    workflowTitle: string;
+    isWorkflowActive: boolean;
+    nodes: any[];
+    edges: any[];
+  }) => {
+    // Clear existing timeout
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
 
-  const setWorkflowTitleWithStorage = useCallback((title: string) => {
-    setWorkflowTitle(title);
-    if (!isUrlWorkflow) {
-      saveToStorage({ workflowId, workflowTitle: title, isWorkflowActive, nodes, edges });
-    }
-  }, [workflowId, isWorkflowActive, nodes, edges, saveToStorage, isUrlWorkflow]);
-
-  const setIsWorkflowActiveWithStorage = useCallback((active: boolean) => {
-    setIsWorkflowActive(active);
-    if (!isUrlWorkflow) {
-      saveToStorage({ workflowId, workflowTitle, isWorkflowActive: active, nodes, edges });
-    }
-  }, [workflowId, workflowTitle, nodes, edges, saveToStorage, isUrlWorkflow]);
-
-  const setNodes = useCallback((nodesOrUpdater: any) => {
-    setNodesState((currentNodes: any[]) => {
-      const newNodes = typeof nodesOrUpdater === 'function' ? nodesOrUpdater(currentNodes) : nodesOrUpdater;
-      // Save after state update (debounced)
-      if (!isUrlWorkflow) {
-        setTimeout(() => {
-          saveToStorage({ workflowId, workflowTitle, isWorkflowActive, nodes: newNodes, edges });
-        }, 500);
+    // Debounce save (500ms)
+    saveTimeoutRef.current = setTimeout(() => {
+      try {
+        const key = getStorageKey(id);
+        localStorage.setItem(key, JSON.stringify(data));
+        // console.log('💾 Auto-saved to', key);
+      } catch (error) {
+        console.error('Error saving to localStorage:', error);
       }
-      return newNodes;
-    });
-  }, [workflowId, workflowTitle, isWorkflowActive, edges, saveToStorage, isUrlWorkflow]);
+    }, 500);
+  }, []);
 
-  const setEdges = useCallback((edgesOrUpdater: any) => {
-    setEdgesState((currentEdges: any[]) => {
-      const newEdges = typeof edgesOrUpdater === 'function' ? edgesOrUpdater(currentEdges) : edgesOrUpdater;
-      // Save after state update (debounced)
-      if (!isUrlWorkflow) {
-        setTimeout(() => {
-          saveToStorage({ workflowId, workflowTitle, isWorkflowActive, nodes, edges: newEdges });
-        }, 500);
-      }
-      return newEdges;
+  // Watch for changes and save
+  useEffect(() => {
+    // Don't save while loading (prevents overwriting with empty state on mount)
+    if (isLoadingWorkflow) return;
+    
+    // Don't save if we have no nodes AND we haven't saved before
+    // This prevents saving empty state on initial mount
+    if (nodes.length === 0 && edges.length === 0 && !hasSavedOnce.current) {
+      return;
+    }
+    
+    hasSavedOnce.current = true;
+
+    // Determine correct storage key:
+    // - If we have a workflowId (set by loader or by saving), use that
+    // - Otherwise use 'draft'
+    const keyId = workflowId || null;
+
+    saveToStorage(keyId, {
+      workflowId,
+      workflowTitle,
+      isWorkflowActive,
+      nodes,
+      edges
     });
-  }, [workflowId, workflowTitle, isWorkflowActive, nodes, saveToStorage, isUrlWorkflow]);
+  }, [workflowId, workflowTitle, isWorkflowActive, nodes, edges, isLoadingWorkflow, saveToStorage]);
+
+
+  // Clean up timeout
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    };
+  }, []);
 
   const resetWorkflow = useCallback(() => {
     setNodesState([]);
@@ -109,16 +126,20 @@ export const useWorkflowState = () => {
     setWorkflowTitle('Untitled Workflow');
     setIsWorkflowActive(false);
     setWorkflowId(null);
-    localStorage.removeItem(WORKFLOW_STORAGE_KEY);
-  }, []);
+    hasSavedOnce.current = false;
+    draftLoaded.current = false;
+
+    // Clear the DRAFT storage
+    localStorage.removeItem(getStorageKey(null));
+  }, [setNodesState, setEdgesState]);
 
   return {
     workflowId,
-    setWorkflowId: setWorkflowIdWithStorage,
+    setWorkflowId,
     workflowTitle,
-    setWorkflowTitle: setWorkflowTitleWithStorage,
+    setWorkflowTitle,
     isWorkflowActive,
-    setIsWorkflowActive: setIsWorkflowActiveWithStorage,
+    setIsWorkflowActive,
     isSaving,
     setIsSaving,
     isExecuting,
@@ -126,10 +147,10 @@ export const useWorkflowState = () => {
     isLoadingWorkflow,
     setIsLoadingWorkflow,
     nodes,
-    setNodes,
+    setNodes: setNodesState,
     onNodesChange,
     edges,
-    setEdges,
+    setEdges: setEdgesState,
     onEdgesChange,
     resetWorkflow
   };

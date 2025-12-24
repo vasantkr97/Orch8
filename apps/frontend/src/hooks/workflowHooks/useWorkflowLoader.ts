@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import { getWorkflowById } from '../../services/workflow.service';
 import { getNodeConfig } from '../../components/nodes/nodeTypes';
 
-
 interface UseWorkflowLoaderProps {
   setWorkflowId: (id: string | null) => void;
   setWorkflowTitle: (title: string) => void;
@@ -12,6 +11,8 @@ interface UseWorkflowLoaderProps {
   setEdges: any;
   setIsLoadingWorkflow: (loading: boolean) => void;
 }
+
+const STORAGE_PREFIX = 'orch8_workflow_';
 
 export const useWorkflowLoader = ({
   setWorkflowId,
@@ -30,9 +31,49 @@ export const useWorkflowLoader = ({
         return;
       }
 
+      // 1. Try Local Storage FIRST for instant load
+      const storageKey = `${STORAGE_PREFIX}${urlWorkflowId}`;
+      let loadedFromStorage = false;
+
       try {
-        console.log('Loading workflow from URL:', urlWorkflowId);
+        const stored = localStorage.getItem(storageKey);
+        if (stored) {
+          try {
+            const data = JSON.parse(stored);
+            // Only use if it matches the requested ID and has valid nodes array
+            if (data.workflowId === urlWorkflowId && Array.isArray(data.nodes)) {
+              console.log('⚡ Fast-loading workflow from localStorage:', data.workflowTitle);
+              
+              // Validate nodes before setting
+              const validNodes = data.nodes.filter((n: any) => n && n.id && n.type);
+              
+              setWorkflowId(data.workflowId);
+              setWorkflowTitle(data.workflowTitle);
+              setIsWorkflowActive(data.isWorkflowActive);
+              setNodes(validNodes);
+              setEdges(data.edges || []);
+              
+              loadedFromStorage = true;
+            }
+          } catch (parseErr) {
+            console.error('Error parsing local storage data, clearing cache:', parseErr);
+            localStorage.removeItem(storageKey);
+          }
+        }
+      } catch (e) {
+        console.error('Error checking localStorage:', e);
+      }
+
+      // If we didn't find it in storage (or it was corrupt), show loader
+      if (!loadedFromStorage) {
         setIsLoadingWorkflow(true);
+      } else {
+        return; // We are done. User sees their local version.
+      }
+
+      // 3. Fallback: Fetch from API
+      try {
+        console.log('🌐 Fetching workflow from API:', urlWorkflowId);
 
         const response = await getWorkflowById(urlWorkflowId);
         const wf = response.data;
@@ -42,35 +83,42 @@ export const useWorkflowLoader = ({
           return;
         }
 
-        console.log('Loaded workflow:', wf.title);
-
         setWorkflowId(wf.id);
         setWorkflowTitle(wf.title || 'Untitled Workflow');
         setIsWorkflowActive(wf.isActive || false);
 
+        // Robust Node Mapping
         const mappedNodes = (wf.nodes || []).map((n: any, idx: number) => {
-          const type = (n.type || '').toLowerCase();
-          const cfg = getNodeConfig(type);
-          const id = n.id || n.name || `node-${idx}`;
-          const position = Array.isArray(n.position)
-            ? { x: n.position[0], y: n.position[1] }
-            : { x: 0, y: idx * 120 };
+          try {
+            if (!n) return null;
 
-          return {
-            id,
-            type,
-            position,
-            data: {
-              ...cfg,
-              type,  // Add type so orch8Node can detect webhook
-              label: n.name || cfg.label,
-              parameters: n.parameters || {},
-              credentialsId: n.credentials?.id,
-              workflowId: wf.id,
-              ...(type === 'webhook' && { webhookToken: wf.webhookToken }),
-            },
-          };
-        });
+            const type = (n.type || '').toLowerCase();
+            // Guard against missing config
+            const cfg = getNodeConfig(type) || { label: 'Unknown Node' }; 
+            const id = n.id || n.name || `node-${idx}`;
+            const position = Array.isArray(n.position)
+              ? { x: n.position[0], y: n.position[1] }
+              : { x: 0, y: idx * 120 };
+
+            return {
+              id,
+              type,
+              position,
+              data: {
+                ...cfg,
+                type,
+                label: n.name || cfg.label || 'Node',
+                parameters: n.parameters || {},
+                credentialsId: n.credentials?.id,
+                workflowId: wf.id,
+                ...(type === 'webhook' && { webhookToken: wf.webhookToken }),
+              },
+            };
+          } catch (err) {
+            console.warn('Skipping invalid node:', n, err);
+            return null;
+          }
+        }).filter(Boolean); // Remote nulls
 
         const mappedEdges = (wf.connections || []).map((c: any, idx: number) => ({
           id: `${c.source}-${c.target}-${idx}`,
@@ -83,28 +131,14 @@ export const useWorkflowLoader = ({
         setNodes(mappedNodes);
         setEdges(mappedEdges);
 
-        // Save to localStorage so /dashboard shows the last viewed workflow
-        const WORKFLOW_STORAGE_KEY = 'orch8_current_workflow';
-        try {
-          localStorage.setItem(WORKFLOW_STORAGE_KEY, JSON.stringify({
-            workflowId: wf.id,
-            workflowTitle: wf.title || 'Untitled Workflow',
-            isWorkflowActive: wf.isActive || false,
-            nodes: mappedNodes,
-            edges: mappedEdges,
-          }));
-          console.log('📥 Saved URL workflow to localStorage:', wf.title);
-        } catch (e) {
-          console.error('Error saving to localStorage:', e);
-        }
-
-        console.log('Workflow loaded successfully');
       } catch (error: any) {
         console.error('Error loading workflow:', error);
-        setWorkflowId(null);
-        setWorkflowTitle('Error Loading Workflow');
-        setNodes([]);
-        setEdges([]);
+        if (!loadedFromStorage) {
+          setWorkflowId(null);
+          setWorkflowTitle('Error Loading Workflow');
+          setNodes([]);
+          setEdges([]);
+        }
       } finally {
         setIsLoadingWorkflow(false);
       }
