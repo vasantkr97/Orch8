@@ -30,7 +30,6 @@ export const createOrch8Node = (
         [key: string]: any;
     }
 ) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { icon, ...restData } = data;
     return {
         id,

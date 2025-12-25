@@ -98,8 +98,8 @@ export function CredentialsSelector({
 
   if (isError) {
     return (
-      <div className={`w-full border border-red-700 rounded-lg ${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2 text-sm'} bg-red-900/20 text-red-300 flex items-center`}>
-        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      <div className="w-full border border-red-700 rounded-lg px-4 py-3 text-lg bg-red-900/20 text-red-300 flex items-center">
+        <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
         Error loading credentials: {(error as any)?.message || 'Unknown error'}
       </div>
     );
@@ -107,8 +107,8 @@ export function CredentialsSelector({
 
   if (isLoading) {
     return (
-      <div className={`w-full border border-gray-700 rounded-lg ${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2 text-sm'} bg-gray-800 text-gray-300 flex items-center`}>
-        <svg className={`animate-spin ${compact ? 'h-3.5 w-3.5 mr-1.5' : 'h-4 w-4 mr-2'} text-gray-500`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <div className="w-full border border-gray-700 rounded-lg px-4 py-3 text-lg bg-gray-800 text-gray-300 flex items-center">
+        <svg className="animate-spin h-5 w-5 mr-3 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
@@ -121,50 +121,50 @@ export function CredentialsSelector({
     if (!showCreateForm) return null;
 
     return (
-      <div className={`absolute top-0 left-full ml-2 z-50 ${compact ? 'w-56 p-2' : 'w-64 p-3'} bg-gray-900 border border-gray-800 rounded-lg shadow-2xl`}>
-        <div className={`flex items-center justify-between ${compact ? 'mb-2' : 'mb-3'}`}>
-          <h4 className={`${compact ? 'text-xs' : 'text-sm'} font-semibold text-gray-200`}>New {credentialType.charAt(0).toUpperCase() + credentialType.slice(1)}</h4>
+      <div className="absolute top-0 left-full ml-3 z-50 w-[400px] p-8 bg-gray-900 border border-gray-800 rounded-xl shadow-2xl">
+        <div className="flex items-center justify-between mb-5">
+          <h4 className="text-lg font-semibold text-gray-200">New {credentialType.charAt(0).toUpperCase() + credentialType.slice(1)}</h4>
           <button onClick={() => { setShowCreateForm(false); setFormData({}); }} className="text-gray-400 hover:text-white">
-            <svg className={`${compact ? 'w-4 h-4' : 'w-5 h-5'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-5">
           <div>
-            <label className="block text-[11px] text-gray-300 mb-1">Name *</label>
+            <label className="block text-lg text-gray-300 mb-2">Name *</label>
             <input
               type="text"
               placeholder={`e.g., My ${credentialType}`}
               value={formData.title || ''}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className={`w-full ${compact ? 'px-2 py-1 text-xs' : 'px-2 py-1.5 text-sm'} border border-gray-700 rounded bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500`}
+              className="w-full px-4 py-3 text-lg border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
           {credentialType.toLowerCase() === 'telegram' && (
             <div>
-              <label className="block text-[11px] text-gray-300 mb-1">Bot Token *</label>
+              <label className="block text-lg text-gray-300 mb-2">Bot Token *</label>
               <input
                 type="password"
                 placeholder="1234567890:ABCdef..."
                 value={formData.botToken || ''}
                 onChange={(e) => setFormData({ ...formData, botToken: e.target.value })}
-                className={`w-full ${compact ? 'px-2 py-1 text-xs' : 'px-2 py-1.5 text-sm'} border border-gray-700 rounded bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                className="w-full px-4 py-3 text-lg border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
           )}
 
           {credentialType.toLowerCase() === 'gemini' && (
             <div>
-              <label className="block text-[11px] text-gray-300 mb-1">API Key *</label>
+              <label className="block text-lg text-gray-300 mb-2">API Key *</label>
               <input
                 type="password"
                 placeholder="AIza..."
                 value={formData.apiKey || ''}
                 onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
-                className={`w-full ${compact ? 'px-2 py-1 text-xs' : 'px-2 py-1.5 text-sm'} border border-gray-700 rounded bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                className="w-full px-4 py-3 text-lg border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
           )}
@@ -172,42 +172,42 @@ export function CredentialsSelector({
           {credentialType.toLowerCase() === 'resendemail' && (
             <>
               <div>
-                <label className="block text-[11px] text-gray-300 mb-1">Resend API Key *</label>
+                <label className="block text-lg text-gray-300 mb-2">Resend API Key *</label>
                 <input
                   type="password"
                   placeholder="re_..."
                   value={formData.apiKey || ''}
                   onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
-                  className={`w-full ${compact ? 'px-2 py-1 text-xs' : 'px-2 py-1.5 text-sm'} border border-gray-700 rounded bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                  className="w-full px-4 py-3 text-lg border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
               <div>
-                <label className="block text-[11px] text-gray-300 mb-1">From Email *</label>
+                <label className="block text-lg text-gray-300 mb-2">From Email *</label>
                 <input
                   type="email"
                   placeholder="noreply@yourdomain.com"
                   value={formData.fromEmail || ''}
                   onChange={(e) => setFormData({ ...formData, fromEmail: e.target.value })}
-                  className={`w-full ${compact ? 'px-2 py-1 text-xs' : 'px-2 py-1.5 text-sm'} border border-gray-700 rounded bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500`}
+                  className="w-full px-4 py-3 text-lg border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
             </>
           )}
 
-          <div className="flex justify-end gap-2 pt-1">
+          <div className="flex justify-end gap-3 pt-3">
             <button
               onClick={() => {
                 setShowCreateForm(false);
                 setFormData({});
               }}
-              className={`${compact ? 'px-3 py-1 text-xs' : 'px-3 py-1.5 text-xs'} rounded-lg border border-gray-700 bg-gray-800 text-white hover:bg-gray-700`}
+              className="px-5 py-2.5 text-lg rounded-lg border border-gray-700 bg-gray-800 text-white hover:bg-gray-700"
             >
               Cancel
             </button>
             <button
               onClick={handleCreateCredential}
               disabled={createMutation.isPending || !isFormValid()}
-              className={`${compact ? 'px-3 py-1 text-xs' : 'px-3 py-1.5 text-xs'} rounded-lg bg-orange-600 text-white hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed`}
+              className="px-5 py-2.5 text-lg rounded-lg bg-orange-600 text-white hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {createMutation.isPending ? 'Saving...' : 'Save & Select'}
             </button>
@@ -230,7 +230,7 @@ export function CredentialsSelector({
             setShowCreateForm(false);
           }
         }}
-        className={`w-full border rounded-lg ${compact ? 'px-2 py-1 text-xs' : 'px-3 py-2.5 text-sm'} focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-800 text-white transition-all ${selectedCredentialId ? 'border-green-500' : 'border-gray-700'
+        className={`w-full border rounded-lg ${compact ? 'px-3 py-3 text-lg' : 'px-4 py-3.5 text-lg'} focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-800 text-white transition-all ${selectedCredentialId ? 'border-green-500' : 'border-gray-700'
           }`}
       >
         <option value="">Select Credential</option>

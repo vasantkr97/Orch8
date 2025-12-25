@@ -39,7 +39,7 @@ export default function ExecutionDetailsModal({ executionId, onClose }: Executio
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden border border-gray-700">
+      <div className="bg-gray-900 rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden border border-gray-700">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-700">
           <h2 className="text-xl font-semibold text-white">Execution Details</h2>
           <button
@@ -52,7 +52,8 @@ export default function ExecutionDetailsModal({ executionId, onClose }: Executio
           </button>
         </div>
 
-        <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-80px)]">
+        <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-80px)] no-scrollbar">
+
           {isLoading ? (
             <div className="text-center py-8 text-gray-400">Loading...</div>
           ) : error ? (
@@ -98,7 +99,7 @@ export default function ExecutionDetailsModal({ executionId, onClose }: Executio
                 <label className="text-sm text-gray-400 mb-2 block">
                   {execution.status === 'failed' ? 'Error Details' : 'Results'}
                 </label>
-                <div className="bg-gray-900 rounded-lg p-4 border border-gray-700">
+                <div className="bg-gray-950 rounded-lg p-4 border border-gray-700">
                   {execution.results ? (
                     <pre className="text-sm text-gray-300 overflow-x-auto whitespace-pre-wrap">
                       {JSON.stringify(execution.results, null, 2)}
@@ -112,7 +113,6 @@ export default function ExecutionDetailsModal({ executionId, onClose }: Executio
               {execution.status === 'failed' && execution.results?.error && (
                 <div className="bg-red-900 bg-opacity-20 border border-red-700 rounded-lg p-4">
                   <div className="flex items-start gap-3">
-                    <div className="text-red-400 text-xl">⚠️</div>
                     <div className="flex-1">
                       <div className="text-red-400 font-semibold mb-2">Error Message:</div>
                       <div className="text-red-300 text-sm">{execution.results.error}</div>

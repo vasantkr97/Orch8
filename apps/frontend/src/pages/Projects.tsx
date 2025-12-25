@@ -27,6 +27,14 @@ export default function Projects() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
+  
+  // Delete confirmation modal state
+  const [deleteModal, setDeleteModal] = useState<{ show: boolean; workflowId: string; workflowTitle: string }>({
+    show: false,
+    workflowId: '',
+    workflowTitle: ''
+  });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchWorkflows = async () => {
     try {
@@ -55,18 +63,31 @@ export default function Projects() {
     navigate(`/workflow/${workflowId}`);
   };
 
-  const handleDeleteWorkflow = async (workflowId: string, workflowTitle: string) => {
-    if (!window.confirm(`Are you sure you want to delete "${workflowTitle}"?`)) {
-      return;
-    }
+  // Open the delete confirmation modal
+  const handleDeleteWorkflow = (workflowId: string, workflowTitle: string) => {
+    console.log('Opening delete modal for:', workflowId, workflowTitle);
+    setDeleteModal({ show: true, workflowId, workflowTitle });
+  };
 
+  // Confirm deletion
+  const confirmDelete = async () => {
+    setIsDeleting(true);
     try {
-      await deleteWorkflow(workflowId);
+      await deleteWorkflow(deleteModal.workflowId);
+      console.log('Delete successful!');
+      setDeleteModal({ show: false, workflowId: '', workflowTitle: '' });
       fetchWorkflows();
     } catch (err: any) {
       console.error('Error deleting workflow:', err);
       alert(`Failed to delete workflow: ${err.response?.data?.error || err.message}`);
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  // Cancel deletion
+  const cancelDelete = () => {
+    setDeleteModal({ show: false, workflowId: '', workflowTitle: '' });
   };
 
   const formatDate = (dateString: string) => {
@@ -255,6 +276,7 @@ export default function Projects() {
                     </Button>
                     <Button
                       onClick={(e: any) => {
+                        e.preventDefault();
                         e.stopPropagation();
                         handleDeleteWorkflow(workflow.id, workflow.title);
                       }}
@@ -273,6 +295,51 @@ export default function Projects() {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal.show && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-[400px] shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
+                <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-white">Delete Workflow</h3>
+            </div>
+            <p className="text-gray-300 mb-6">
+              Are you sure you want to delete <span className="font-semibold text-white">"{deleteModal.workflowTitle}"</span>? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={cancelDelete}
+                disabled={isDeleting}
+                className="px-4 py-2 text-sm rounded-lg border border-gray-600 bg-gray-800 text-white hover:bg-gray-700 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={isDeleting}
+                className="px-4 py-2 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
+              >
+                {isDeleting ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

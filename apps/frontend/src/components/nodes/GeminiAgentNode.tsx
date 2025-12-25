@@ -48,43 +48,43 @@ const GeminiAgentNode = memo(({ data, selected, id }: NodeProps) => {
       </div>
 
       <div
-        className={`relative bg-gray-900 w-60 h-28 border-2 transition-all duration-300 flex items-center justify-center rounded-xl ${(data as any)?.hasError
-            ? 'border-red-500 shadow-red-500/50'
-            : (data as any)?.isExecuting
-              ? 'border-blue-500 shadow-blue-500/50 animate-pulse'
-              : (data as any)?.isExecuted
-                ? 'border-green-500 shadow-green-500/50'
-                : (selected ? 'border-gray-500 shadow-lg scale-105' : 'border-white shadow-md')
+        className={`relative bg-gray-900 w-72 h-32 border-2 transition-all duration-300 flex items-center justify-center rounded-xl ${(data as any)?.hasError
+          ? 'border-red-500 shadow-red-500/50'
+          : (data as any)?.isExecuting
+            ? 'border-blue-500 shadow-blue-500/50 animate-pulse'
+            : (data as any)?.isExecuted
+              ? 'border-green-500 shadow-green-500/50'
+              : (selected ? 'border-gray-500 shadow-lg scale-105' : 'border-white shadow-md')
           } ${(data as any)?.isExecuted || (data as any)?.hasError || (data as any)?.isExecuting ? '' : 'hover:border-orange-500'} hover:shadow-lg hover:scale-102`}
       >
         {!isTrigger && (
           <Handle
             type="target"
             position={Position.Left}
-            className="absolute top-1/2 -translate-y-1/2 -left-2
-                       bg-gray-400 border-2 border-gray-300 w-3 h-3 rounded-full
-                       hover:scale-125 hover:border-orange-500 transition-all duration-200"
+            className="absolute bg-gray-400 border-2 border-gray-300 rounded-full
+                       hover:scale-125 hover:border-orange-500 transition-all duration-200 z-10"
+            style={{ width: '12px', height: '12px', left: 0, top: '50%', transform: 'translate(-50%, -50%)' }}
           />
         )}
 
         <Handle
           type="source"
           position={Position.Right}
-          className="absolute top-1/2 -translate-y-1/2 -right-2
-                     bg-gray-400 border-2 border-gray-300 w-3 h-3 rounded-full
-                     hover:scale-125 hover:border-orange-500 transition-all duration-200"
+          className="absolute bg-gray-400 border-2 border-gray-300 rounded-full
+                     hover:scale-125 hover:border-orange-500 transition-all duration-200 z-10"
+          style={{ width: '12px', height: '12px', left: '100%', top: '50%', transform: 'translate(-50%, -50%)' }}
         />
 
         <div className="flex items-center justify-center">
-          <div className="w-24 h-16 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-md">
-            <BrainCircuit className="w-12 h-12 text-white" />
+          <div className="w-40 h-24 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-md">
+            <BrainCircuit className="w-20 h-16 text-white" />
           </div>
         </div>
       </div>
 
       {(data as any)?.showConfig && (
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 w-64 bg-gray-900 border border-gray-800 rounded-lg shadow-xl p-3">
-          <div className="text-xs font-semibold text-gray-200 mb-2">Quick Config</div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 w-[500px] bg-gray-900 border border-gray-800 rounded-xl shadow-2xl p-8">
+          <div className="text-base font-semibold text-gray-200 mb-4">Quick Config</div>
           <GeminiQuickConfig id={id} data={data} />
         </div>
       )}
@@ -117,12 +117,9 @@ function GeminiQuickConfig({ id, data }: any) {
     cancelledRef.current = false;
   }, [id]);
 
-  // Auto-save when config panel closes (showConfig becomes false)
   const prevShowConfig = React.useRef(data?.showConfig);
   useEffect(() => {
-    // If showConfig just changed from true to false, save the local state (unless cancelled)
     if (prevShowConfig.current === true && data?.showConfig === false && !cancelledRef.current) {
-      // Always save directly via rf.setNodes for consistency
       rf.setNodes((nodes: any[]) => nodes.map((n: any) => {
         if (n.id !== id) return n;
         return {
@@ -140,9 +137,9 @@ function GeminiQuickConfig({ id, data }: any) {
   }, [data?.showConfig, local, id, rf]);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-5">
       <div>
-        <label className="block text-[11px] text-gray-400 mb-1">Credentials</label>
+        <label className="block text-lg text-gray-400 mb-2">Credentials</label>
         <CredentialsSelector
           credentialType="gemini"
           selectedCredentialId={local.credentialsId}
@@ -151,29 +148,29 @@ function GeminiQuickConfig({ id, data }: any) {
         />
       </div>
       <div>
-        <label className="block text-[11px] text-gray-400 mb-1">API Key</label>
+        <label className="block text-lg text-gray-400 mb-2">API Key</label>
         <input
           type="password"
-          className="w-full border rounded px-2 py-1.5 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs"
+          className="w-full border rounded-lg px-4 py-3 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg"
           value={(local.parameters as any)?.apiKey || ''}
           onChange={(e) => setLocal((l) => ({ ...l, parameters: { ...(l.parameters || {}), apiKey: e.target.value } }))}
           placeholder="AIza..."
         />
       </div>
       <div>
-        <label className="block text-[11px] text-gray-400 mb-1">Prompt</label>
+        <label className="block text-lg text-gray-400 mb-2">Prompt</label>
         <textarea
-          rows={3}
-          className="w-full border rounded px-2 py-1.5 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs"
+          rows={4}
+          className="w-full border rounded-lg px-4 py-3 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg"
           value={(local.parameters as any)?.prompt || ''}
           onChange={(e) => setLocal((l) => ({ ...l, parameters: { ...(l.parameters || {}), prompt: e.target.value } }))}
           placeholder="Enter your prompt..."
         />
       </div>
-      <label className="inline-flex items-center gap-2 text-[11px] text-gray-300">
+      <label className="inline-flex items-center gap-3 text-lg text-gray-300">
         <input
           type="checkbox"
-          className="accent-orange-500"
+          className="accent-orange-500 w-4 h-4"
           checked={Boolean((local.parameters as any)?.usePreviousResult)}
           onChange={(e) => setLocal((l) => ({ ...l, parameters: { ...(l.parameters || {}), usePreviousResult: e.target.checked } }))}
         />
@@ -182,9 +179,9 @@ function GeminiQuickConfig({ id, data }: any) {
 
       {Boolean((local.parameters as any)?.usePreviousResult) && (
         <div>
-          <label className="block text-[11px] text-gray-400 mb-1">Source Node ID *</label>
+          <label className="block text-lg text-gray-400 mb-2">Source Node ID *</label>
           <input
-            className="w-full border rounded px-2 py-1.5 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-mono"
+            className="w-full border rounded-lg px-4 py-3 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg font-mono"
             value={(local.parameters as any)?.sourceNodeId || ''}
             onChange={(e) => setLocal((l) => ({
               ...l,
@@ -192,13 +189,13 @@ function GeminiQuickConfig({ id, data }: any) {
             }))}
             placeholder="Paste node ID here"
           />
-          <p className="text-[10px] text-gray-500 mt-1">
+          <p className="text-sm text-gray-500 mt-2">
             Copy the ID from the source node
           </p>
         </div>
       )}
 
-      <div className="flex justify-end gap-2 pt-1">
+      <div className="flex justify-end gap-3 pt-2">
         <button
           onClick={() => {
             cancelledRef.current = true;
@@ -208,7 +205,7 @@ function GeminiQuickConfig({ id, data }: any) {
             });
             rf.setNodes((nodes: any[]) => nodes.map((n: any) => (n.id === id ? { ...n, data: { ...n.data, showConfig: false } } : n)));
           }}
-          className="px-3 py-1.5 text-xs rounded-lg border border-gray-700 bg-gray-800 text-white hover:bg-gray-700"
+          className="px-5 py-2.5 text-lg rounded-lg border border-gray-700 bg-gray-800 text-white hover:bg-gray-700"
         >
           Cancel
         </button>
@@ -228,7 +225,7 @@ function GeminiQuickConfig({ id, data }: any) {
               };
             }));
           }}
-          className="px-3 py-1.5 text-xs rounded-lg bg-orange-600 text-white hover:bg-orange-700"
+          className="px-5 py-2.5 text-lg rounded-lg bg-orange-600 text-white hover:bg-orange-700"
         >
           Save Config
         </button>

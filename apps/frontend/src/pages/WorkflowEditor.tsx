@@ -21,6 +21,7 @@ export default function WorkflowEditor() {
   // Execution progress tracking
   const executionProgress = useExecutionProgress({
     setNodes: state.setNodes,
+    setEdges: state.setEdges,
     setIsExecuting: state.setIsExecuting
   });
 

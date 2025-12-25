@@ -47,7 +47,7 @@ const EmailNode = memo(({ data, selected, id }: NodeProps) => {
       </div>
 
       <div
-        className={`relative bg-gray-900 w-48 h-24 border-2 transition-all duration-300 flex items-center justify-center ${isTrigger ? 'rounded-l-full rounded-r-lg' : 'rounded-lg'
+        className={`relative bg-gray-900 w-60 h-28 border-2 transition-all duration-300 flex items-center justify-center ${isTrigger ? 'rounded-l-full rounded-r-lg' : 'rounded-xl'
           } ${(data as any)?.hasError
             ? 'border-red-500 shadow-red-500/50'
             : (data as any)?.isExecuting
@@ -61,24 +61,24 @@ const EmailNode = memo(({ data, selected, id }: NodeProps) => {
           <Handle
             type="target"
             position={Position.Left}
-            className="absolute top-1/2 -translate-y-1/2 -left-2
-                       bg-gray-400 border-2 border-gray-300 w-3 h-3 rounded-full
-                       hover:scale-125 hover:border-orange-500 transition-all duration-200"
+            className="absolute bg-gray-400 border-2 border-gray-300 rounded-full
+                       hover:scale-125 hover:border-orange-500 transition-all duration-200 z-10"
+            style={{ width: '12px', height: '12px', left: 0, top: '50%', transform: 'translate(-50%, -50%)' }}
           />
         )}
 
         <Handle
           type="source"
           position={Position.Right}
-          className="absolute top-1/2 -translate-y-1/2 -right-2
-                     bg-gray-400 border-2 border-gray-300 w-3 h-3 rounded-full
-                     hover:scale-125 hover:border-orange-500 transition-all duration-200"
+          className="absolute bg-gray-400 border-2 border-gray-300 rounded-full
+                     hover:scale-125 hover:border-orange-500 transition-all duration-200 z-10"
+          style={{ width: '12px', height: '12px', left: '100%', top: '50%', transform: 'translate(-50%, -50%)' }}
         />
 
         <div className="flex items-center justify-center">
-          <div className="w-20 h-16 bg-gradient-to-br from-red-500 to-orange-600 rounded-lg flex items-center justify-center shadow-md">
-            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
-              <svg viewBox="0 0 32 32" className="w-8 h-8">
+          <div className="w-28 h-20 bg-gradient-to-br from-red-500 to-orange-600 rounded-lg flex items-center justify-center shadow-md">
+            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm">
+              <svg viewBox="0 0 32 32" className="w-12 h-12">
                 <path fill="#4285f4" d="M5.5,5.5h0a3,3,0,0,1,3,3v18a0,0,0,0,1,0,0h-4a2,2,0,0,1-2-2V8.5a3,3,0,0,1,3-3Z" />
                 <path fill="#34A853" d="M25.5,5.5h4a0,0,0,0,1,0,0v18a3,3,0,0,1-3,3h0a3,3,0,0,1-3-3V7.5a2,2,0,0,1,2-2Z" />
                 <path fill="#EA4335" d="M16.58,19.1068l-12.69-8.0757A3,3,0,0,1,7.1109,5.97l9.31,5.9243L24.78,6.0428A3,3,0,0,1,28.22,10.9579Z" />
@@ -90,14 +90,14 @@ const EmailNode = memo(({ data, selected, id }: NodeProps) => {
       </div>
 
       {(data as any)?.showConfig && (
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 w-64 bg-gray-900 border border-gray-800 rounded-lg shadow-xl p-3">
-          <div className="text-xs font-semibold text-gray-200 mb-2">Quick Config</div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 w-[500px] bg-gray-900 border border-gray-800 rounded-xl shadow-2xl p-6">
+          <div className="text-base font-semibold text-gray-200 mb-4">Quick Config</div>
           <EmailQuickConfig id={id} data={data} />
         </div>
       )}
 
       <div className="mt-2 flex flex-col items-center text-center max-w-36 mx-auto">
-        <div className="text-base font-medium text-gray-300 leading-tight truncate w-full">
+        <div className="text-lg font-medium text-gray-300 leading-tight truncate w-full">
           {(data as any)?.label || 'Email'}
         </div>
       </div>
@@ -124,12 +124,9 @@ function EmailQuickConfig({ id, data }: any) {
     cancelledRef.current = false;
   }, [id]);
 
-  // Auto-save when config panel closes (showConfig becomes false)
   const prevShowConfig = React.useRef(data?.showConfig);
   useEffect(() => {
-    // If showConfig just changed from true to false, save the local state (unless cancelled)
     if (prevShowConfig.current === true && data?.showConfig === false && !cancelledRef.current) {
-      // Always save directly via rf.setNodes for consistency
       rf.setNodes((nodes: any[]) => nodes.map((n: any) => {
         if (n.id !== id) return n;
         return {
@@ -147,9 +144,9 @@ function EmailQuickConfig({ id, data }: any) {
   }, [data?.showConfig, local, id, rf]);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-5">
       <div>
-        <label className="block text-[11px] text-gray-400 mb-1">Credentials</label>
+        <label className="block text-lg text-gray-400 mb-2">Credentials</label>
         <CredentialsSelector
           credentialType="resendemail"
           selectedCredentialId={local.credentialsId}
@@ -157,20 +154,20 @@ function EmailQuickConfig({ id, data }: any) {
           compact
         />
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-[11px] text-gray-400 mb-1">From</label>
+          <label className="block text-lg text-gray-400 mb-2">From</label>
           <input
-            className="w-full border rounded px-2 py-1.5 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs"
+            className="w-full border rounded-lg px-4 py-3 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg"
             value={(local.parameters as any)?.from || ''}
             onChange={(e) => setLocal((l) => ({ ...l, parameters: { ...(l.parameters || {}), from: e.target.value } }))}
             placeholder="from@example.com"
           />
         </div>
         <div>
-          <label className="block text-[11px] text-gray-400 mb-1">To</label>
+          <label className="block text-lg text-gray-400 mb-2">To</label>
           <input
-            className="w-full border rounded px-2 py-1.5 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs"
+            className="w-full border rounded-lg px-4 py-3 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg"
             value={(local.parameters as any)?.to || ''}
             onChange={(e) => setLocal((l) => ({ ...l, parameters: { ...(l.parameters || {}), to: e.target.value } }))}
             placeholder="to@example.com"
@@ -178,28 +175,28 @@ function EmailQuickConfig({ id, data }: any) {
         </div>
       </div>
       <div>
-        <label className="block text-[11px] text-gray-400 mb-1">Subject</label>
+        <label className="block text-lg text-gray-400 mb-2">Subject</label>
         <input
-          className="w-full border rounded px-2 py-1.5 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs"
+          className="w-full border rounded-lg px-4 py-3 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg"
           value={(local.parameters as any)?.subject || ''}
           onChange={(e) => setLocal((l) => ({ ...l, parameters: { ...(l.parameters || {}), subject: e.target.value } }))}
           placeholder="Subject"
         />
       </div>
       <div>
-        <label className="block text-[11px] text-gray-400 mb-1">Text</label>
+        <label className="block text-lg text-gray-400 mb-2">Text</label>
         <textarea
-          rows={3}
-          className="w-full border rounded px-2 py-1.5 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs"
+          rows={4}
+          className="w-full border rounded-lg px-4 py-3 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg"
           value={(local.parameters as any)?.text || ''}
           onChange={(e) => setLocal((l) => ({ ...l, parameters: { ...(l.parameters || {}), text: e.target.value } }))}
           placeholder="Email content..."
         />
       </div>
-      <label className="inline-flex items-center gap-2 text-[11px] text-gray-300">
+      <label className="inline-flex items-center gap-3 text-lg text-gray-300">
         <input
           type="checkbox"
-          className="accent-orange-500"
+          className="accent-orange-500 w-4 h-4"
           checked={Boolean((local.parameters as any)?.usePreviousResult)}
           onChange={(e) => setLocal((l) => ({ ...l, parameters: { ...(l.parameters || {}), usePreviousResult: e.target.checked } }))}
         />
@@ -208,9 +205,9 @@ function EmailQuickConfig({ id, data }: any) {
 
       {Boolean((local.parameters as any)?.usePreviousResult) && (
         <div>
-          <label className="block text-[11px] text-gray-400 mb-1">Source Node ID *</label>
+          <label className="block text-lg text-gray-400 mb-2">Source Node ID *</label>
           <input
-            className="w-full border rounded px-2 py-1.5 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs font-mono"
+            className="w-full border rounded-lg px-4 py-3 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg font-mono"
             value={(local.parameters as any)?.sourceNodeId || ''}
             onChange={(e) => setLocal((l) => ({
               ...l,
@@ -218,13 +215,13 @@ function EmailQuickConfig({ id, data }: any) {
             }))}
             placeholder="Paste node ID here"
           />
-          <p className="text-[10px] text-gray-500 mt-1">
+          <p className="text-sm text-gray-500 mt-2">
             Copy the ID from the source node
           </p>
         </div>
       )}
 
-      <div className="flex justify-end gap-2 pt-1">
+      <div className="flex justify-end gap-3 pt-2">
         <button
           onClick={() => {
             cancelledRef.current = true;
@@ -234,13 +231,12 @@ function EmailQuickConfig({ id, data }: any) {
             });
             rf.setNodes((nodes: any[]) => nodes.map((n: any) => (n.id === id ? { ...n, data: { ...n.data, showConfig: false } } : n)));
           }}
-          className="px-3 py-1.5 text-xs rounded-lg border border-gray-700 bg-gray-800 text-white hover:bg-gray-700"
+          className="px-5 py-2.5 text-lg rounded-lg border border-gray-700 bg-gray-800 text-white hover:bg-gray-700"
         >
           Cancel
         </button>
         <button
           onClick={() => {
-            // Combine save and close into a single setNodes call to avoid race condition
             rf.setNodes((nodes: any[]) => nodes.map((n: any) => {
               if (n.id !== id) return n;
               return {
@@ -249,12 +245,12 @@ function EmailQuickConfig({ id, data }: any) {
                   ...n.data,
                   credentialsId: local.credentialsId || undefined,
                   parameters: { ...(n.data?.parameters || {}), ...(local.parameters || {}) },
-                  showConfig: false, // Close config after saving
+                  showConfig: false, 
                 }
               };
             }));
           }}
-          className="px-3 py-1.5 text-xs rounded-lg bg-orange-600 text-white hover:bg-orange-700"
+          className="px-5 py-2.5 text-lg rounded-lg bg-orange-600 text-white hover:bg-orange-700"
         >
           Save Config
         </button>

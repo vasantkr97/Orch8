@@ -9,7 +9,7 @@ interface NodeSelectorProps {
 }
 
 const nodeCategories = {
-  'Triggers': ['manual', 'webhook'],
+  'Triggers': ['manual', 'webhook', ],
   'Actions': ['telegram', 'resendemail', 'gemini'],
 };
 

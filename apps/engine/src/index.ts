@@ -355,8 +355,8 @@ function safeClone(
 ): any {
 
     if (seen.has(obj)) {
-        return '[Circular Reference]';
-    }
+            return '[Circular Reference]';
+        }
 
     if (depth > maxDepth) {
         return '[Max Depth Reached]'

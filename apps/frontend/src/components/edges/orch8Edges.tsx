@@ -118,7 +118,7 @@ const orch8Edge = ({
                 backdropFilter: 'blur(8px)'
               }}
             >
-              Processing...
+              Executing...
             </div>
           )}
         </div>

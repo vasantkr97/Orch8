@@ -2,14 +2,14 @@ import { Play, Link, MessageCircle, BrainCircuit, Settings } from 'lucide-react'
 
 export const nodeConfigs = {
     manual: {
-        icon: <Play className="w-6 h-6 text-white" />,
+        icon: <Play className="w-10 h-10 text-white" />,
         color: '#007acc',
         label: 'Manual Trigger',
         description: 'Manually start the workflow',
         isTrigger: true,
     },
     webhook: {
-        icon: <Link className="w-6 h-6 text-white" />,
+        icon: <Link className="w-10 h-10 text-white" />,
         color: '#28a745',
         label: 'Webhook',
         description: 'Trigger on incoming HTTP requests',

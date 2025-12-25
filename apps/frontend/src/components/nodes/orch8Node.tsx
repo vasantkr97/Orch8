@@ -66,7 +66,7 @@ const orch8Node = memo(({ data, selected, id }: NodeProps) => {
                         title={webhookUrl ? "Copy webhook URL" : "Save workflow to generate webhook URL"}
                     >
                         <svg className={`w-4.5 h-4.5 ${webhookUrl ? 'text-gray-400 hover:text-purple-500' : 'text-gray-600 hover:text-gray-500'}`} fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                            <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z" />
                         </svg>
                     </button>
                 )}
@@ -82,7 +82,7 @@ const orch8Node = memo(({ data, selected, id }: NodeProps) => {
             </div>
 
             <div
-                className={`relative bg-gray-900 w-40 h-24 border-2 transition-all duration-300 flex items-center justify-center ${isTrigger ? 'rounded-l-full rounded-r-lg' : 'rounded-lg'
+                className={`relative bg-gray-900 w-56 h-28 border-2 transition-all duration-300 flex items-center justify-center ${isTrigger ? 'rounded-l-full rounded-r-lg' : 'rounded-lg'
                     } ${(data as any)?.hasError
                         ? 'border-red-500 shadow-red-500/50'
                         : (data as any)?.isExecuting
@@ -96,22 +96,26 @@ const orch8Node = memo(({ data, selected, id }: NodeProps) => {
                     <Handle
                         type="target"
                         position={Position.Left}
-                        className="absolute top-1/2 -translate-y-1/2 -left-2
-                       bg-gray-400 border-2 border-gray-300 w-3 h-3 rounded-full
-                       hover:scale-125 hover:border-orange-500 transition-all duration-200"
+                        className="absolute bg-gray-400 border-2 border-gray-300 rounded-full
+                       hover:scale-125 hover:border-orange-500 transition-all duration-200 z-10"
+                        style={{ width: '12px', height: '12px', left: 0, top: '50%', transform: 'translate(-50%, -50%)' }}
                     />
                 )}
 
                 <Handle
                     type="source"
                     position={Position.Right}
-                    className="absolute top-1/2 -translate-y-1/2 -right-2
-                     bg-gray-400 border-2 border-gray-300 w-3 h-3 rounded-full
-                     hover:scale-125 hover:border-orange-500 transition-all duration-200"
+                    className="absolute bg-gray-400 border-2 border-gray-300 rounded-full
+                     hover:scale-125 hover:border-orange-500 transition-all duration-200 z-10"
+                    style={{ width: '12px', height: '12px', left: '100%', top: '50%', transform: 'translate(-50%, -50%)' }}
                 />
 
-                <div className="w-16 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-md">
-                    <span className="text-2xl" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))' }}>
+                <div className={`w-28 h-20 rounded-lg flex items-center justify-center shadow-md bg-gradient-to-br ${
+                    (data as any)?.type === 'webhook' 
+                        ? 'from-green-500 to-green-600' 
+                        : 'from-blue-500 to-blue-600'
+                }`}>
+                    <span className="text-4xl" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))' }}>
                         {getStatusIcon()}
                     </span>
                 </div>

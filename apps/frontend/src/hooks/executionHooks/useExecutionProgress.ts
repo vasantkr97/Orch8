@@ -2,18 +2,41 @@ import { useCallback, useRef } from 'react';
 import { getExecutionById } from '../../services/execution.service';
 
 interface UseExecutionProgressProps {
-  setNodes: (updater: (nodes: any[]) => any[]) => void;
+  setNodes: (updater: any) => void;
+  setEdges: (updater: any) => void;
   setIsExecuting: (executing: boolean) => void;
 }
 
-export const useExecutionProgress = ({ setNodes, setIsExecuting }: UseExecutionProgressProps) => {
+export const useExecutionProgress = ({ setNodes, setEdges, setIsExecuting }: UseExecutionProgressProps) => {
   const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const currentExecutionIdRef = useRef<string | null>(null);
   const isExecutingRef = useRef<boolean>(false);
   const lastCompletedNodesRef = useRef<string[]>([]);
 
+  // Update edge states based on their target node's execution state
+  // Edge shows as "executing" when data is flowing INTO the target node
+  const updateEdgeStates = useCallback((nodeStates: Map<string, { isExecuting: boolean; isExecuted: boolean; hasError: boolean }>) => {
+    setEdges((edges: any[]) =>
+      edges.map((edge: any) => {
+        const targetState = nodeStates.get(edge.target);
+        const sourceState = nodeStates.get(edge.source);
+        if (!targetState) return edge;
+
+        return {
+          ...edge,
+          data: {
+            ...edge.data,
+            isExecuting: targetState.isExecuting,
+            hasExecuted: sourceState?.isExecuted || false,
+            hasError: targetState.hasError
+          }
+        };
+      })
+    );
+  }, [setEdges]);
+
   const resetNodeStates = useCallback(() => {
-    console.log('Resetting all node states');
+    console.log('Resetting all node and edge states');
     lastCompletedNodesRef.current = [];
     setNodes((nodes: any[]) =>
       nodes.map((node: any) => ({
@@ -26,7 +49,18 @@ export const useExecutionProgress = ({ setNodes, setIsExecuting }: UseExecutionP
         }
       }))
     );
-  }, [setNodes]);
+    setEdges((edges: any[]) =>
+      edges.map((edge: any) => ({
+        ...edge,
+        data: {
+          ...edge.data,
+          isExecuting: false,
+          hasExecuted: false,
+          hasError: false
+        }
+      }))
+    );
+  }, [setNodes, setEdges]);
 
   // Update node states based on real-time backend progress
   const updateNodeStates = useCallback((progress: {
@@ -35,12 +69,22 @@ export const useExecutionProgress = ({ setNodes, setIsExecuting }: UseExecutionP
     nodeResults: Record<string, any>;
     status: string;
   }) => {
-    setNodes((nodes: any[]) =>
-      nodes.map((node: any) => {
+    // Build node states map for edge updates
+    const nodeStatesMap = new Map<string, { isExecuting: boolean; isExecuted: boolean; hasError: boolean }>();
+
+    setNodes((nodes: any[]) => {
+      const updatedNodes = nodes.map((node: any) => {
         const nodeResult = progress.nodeResults?.[node.id];
         const isCompleted = progress.completedNodes?.includes(node.id);
         const isCurrentlyExecuting = progress.currentNode === node.id;
         const hasError = nodeResult?.success === false;
+
+        // Store state for edge updates
+        nodeStatesMap.set(node.id, {
+          isExecuting: isCurrentlyExecuting,
+          isExecuted: isCompleted && !hasError,
+          hasError: hasError
+        });
 
         return {
           ...node,
@@ -51,9 +95,13 @@ export const useExecutionProgress = ({ setNodes, setIsExecuting }: UseExecutionP
             hasError: hasError
           }
         };
-      })
-    );
-  }, [setNodes]);
+      });
+      return updatedNodes;
+    });
+
+    // Update edge states based on node states
+    updateEdgeStates(nodeStatesMap);
+  }, [setNodes, updateEdgeStates]);
 
   // Poll for real-time execution progress
   const pollExecutionProgress = useCallback(async (executionId: string) => {
@@ -65,7 +113,7 @@ export const useExecutionProgress = ({ setNodes, setIsExecuting }: UseExecutionP
       const status = execution?.status;
       const results = execution?.results || {};
 
-      console.log('📊 Polling progress:', {
+      console.log('Polling progress:', {
         status,
         currentNode: results.currentNode,
         completedNodes: results.completedNodes?.length || 0
@@ -81,13 +129,22 @@ export const useExecutionProgress = ({ setNodes, setIsExecuting }: UseExecutionP
 
       // Check if execution is complete
       if (status === 'success') {
-        console.log('✅ Execution completed successfully');
+        console.log('Execution completed successfully');
+        // Build final node states map for edge updates
+        const finalNodeStates = new Map<string, { isExecuting: boolean; isExecuted: boolean; hasError: boolean }>();
+        
         // Mark ALL executed nodes as completed
         setNodes((nodes: any[]) =>
           nodes.map((node: any) => {
             const isInOrder = results.executionOrder?.includes(node.id);
             const nodeResult = results.nodeResults?.[node.id];
             const hasError = nodeResult?.success === false;
+
+            finalNodeStates.set(node.id, {
+              isExecuting: false,
+              isExecuted: isInOrder && !hasError,
+              hasError: hasError
+            });
 
             return {
               ...node,
@@ -100,10 +157,15 @@ export const useExecutionProgress = ({ setNodes, setIsExecuting }: UseExecutionP
             };
           })
         );
+        // Update edges for final state
+        updateEdgeStates(finalNodeStates);
         setIsExecuting(false);
         return true;
       } else if (status === 'failed') {
         console.log('Execution failed');
+        // Build error node states map for edge updates
+        const errorNodeStates = new Map<string, { isExecuting: boolean; isExecuted: boolean; hasError: boolean }>();
+        
         // Show error state
         setNodes((nodes: any[]) =>
           nodes.map((node: any) => {
@@ -111,6 +173,13 @@ export const useExecutionProgress = ({ setNodes, setIsExecuting }: UseExecutionP
             const isCompleted = results.completedNodes?.includes(node.id) ||
               results.executionOrder?.includes(node.id);
             const hasError = nodeResult?.success === false;
+            const nodeHasError = hasError || (node.data?.isExecuting && status === 'failed');
+
+            errorNodeStates.set(node.id, {
+              isExecuting: false,
+              isExecuted: isCompleted && !hasError,
+              hasError: nodeHasError
+            });
 
             return {
               ...node,
@@ -118,11 +187,13 @@ export const useExecutionProgress = ({ setNodes, setIsExecuting }: UseExecutionP
                 ...node.data,
                 isExecuting: false,
                 isExecuted: isCompleted && !hasError,
-                hasError: hasError || (node.data?.isExecuting && status === 'failed')
+                hasError: nodeHasError
               }
             };
           })
         );
+        // Update edges for error state
+        updateEdgeStates(errorNodeStates);
         setIsExecuting(false);
         return true;
       }
@@ -132,7 +203,7 @@ export const useExecutionProgress = ({ setNodes, setIsExecuting }: UseExecutionP
       console.error('Error polling execution progress:', error);
       return false;
     }
-  }, [setNodes, setIsExecuting, updateNodeStates]);
+  }, [setNodes, setEdges, setIsExecuting, updateNodeStates, updateEdgeStates]);
 
   // Full stop - clears polling
   const stopTracking = useCallback(() => {
@@ -140,13 +211,12 @@ export const useExecutionProgress = ({ setNodes, setIsExecuting }: UseExecutionP
       clearInterval(pollingIntervalRef.current);
       pollingIntervalRef.current = null;
     }
+
     currentExecutionIdRef.current = null;
     isExecutingRef.current = false;
     lastCompletedNodesRef.current = [];
-    console.log('Stopped execution progress tracking');
   }, []);
 
-  // Start tracking execution progress
   const startTracking = useCallback((executionId: string, _nodes: any[], _edges: any[]) => {
     // Prevent overlapping executions
     if (isExecutingRef.current) {
@@ -154,18 +224,12 @@ export const useExecutionProgress = ({ setNodes, setIsExecuting }: UseExecutionP
       return;
     }
 
-    console.log('🚀 Starting real-time execution tracking:', executionId);
-
-    // Mark as executing
-    isExecutingRef.current = true;
-
-    // Stop any existing tracking
     stopTracking();
 
-    // Reset all node states
+    isExecutingRef.current = true;
+
     resetNodeStates();
 
-    // Store execution ID
     currentExecutionIdRef.current = executionId;
 
     // Poll for progress - start immediately and then every 500ms for real-time updates
@@ -186,7 +250,7 @@ export const useExecutionProgress = ({ setNodes, setIsExecuting }: UseExecutionP
     // Initial poll immediately
     pollForProgress();
 
-    // Then poll every 500ms for near real-time updates
+    //poll every 500ms for near real-time updates
     pollingIntervalRef.current = setInterval(pollForProgress, 500);
 
   }, [resetNodeStates, pollExecutionProgress, stopTracking]);
