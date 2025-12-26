@@ -15,7 +15,6 @@ export default function Sidebar() {
       },
       onError: (error: any) => {
         console.error("Signout error:", error);
-        // Still redirect even if signout fails
         navigate("/signin");
       }
     });

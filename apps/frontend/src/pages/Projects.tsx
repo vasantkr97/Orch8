@@ -63,9 +63,7 @@ export default function Projects() {
     navigate(`/workflow/${workflowId}`);
   };
 
-  // Open the delete confirmation modal
   const handleDeleteWorkflow = (workflowId: string, workflowTitle: string) => {
-    console.log('Opening delete modal for:', workflowId, workflowTitle);
     setDeleteModal({ show: true, workflowId, workflowTitle });
   };
 
@@ -74,11 +72,9 @@ export default function Projects() {
     setIsDeleting(true);
     try {
       await deleteWorkflow(deleteModal.workflowId);
-      console.log('Delete successful!');
       setDeleteModal({ show: false, workflowId: '', workflowTitle: '' });
       fetchWorkflows();
     } catch (err: any) {
-      console.error('Error deleting workflow:', err);
       alert(`Failed to delete workflow: ${err.response?.data?.error || err.message}`);
     } finally {
       setIsDeleting(false);
@@ -296,7 +292,6 @@ export default function Projects() {
         </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
       {deleteModal.show && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-[400px] shadow-2xl">

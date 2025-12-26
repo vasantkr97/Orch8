@@ -31,7 +31,7 @@ export const useWorkflowLoader = ({
         return;
       }
 
-      // 1. Try Local Storage FIRST for instant load
+      // Try Local Storage FIRST for instant load
       const storageKey = `${STORAGE_PREFIX}${urlWorkflowId}`;
       let loadedFromStorage = false;
 
@@ -42,7 +42,6 @@ export const useWorkflowLoader = ({
             const data = JSON.parse(stored);
             // Only use if it matches the requested ID and has valid nodes array
             if (data.workflowId === urlWorkflowId && Array.isArray(data.nodes)) {
-              console.log('⚡ Fast-loading workflow from localStorage:', data.workflowTitle);
               
               // Validate nodes before setting
               const validNodes = data.nodes.filter((n: any) => n && n.id && n.type);
@@ -56,30 +55,30 @@ export const useWorkflowLoader = ({
               loadedFromStorage = true;
             }
           } catch (parseErr) {
-            console.error('Error parsing local storage data, clearing cache:', parseErr);
+            console.error('error parsing local storage data, clearing cache:', parseErr);
             localStorage.removeItem(storageKey);
           }
         }
       } catch (e) {
-        console.error('Error checking localStorage:', e);
+        console.error('error checking localStorage:', e);
       }
 
-      // If we didn't find it in storage (or it was corrupt), show loader
+
       if (!loadedFromStorage) {
         setIsLoadingWorkflow(true);
       } else {
-        return; // We are done. User sees their local version.
+        return; 
       }
 
-      // 3. Fallback: Fetch from API
+      // Fallback: Fetch from API
       try {
-        console.log('🌐 Fetching workflow from API:', urlWorkflowId);
+        console.log('Fetching workflow from API:', urlWorkflowId);
 
         const response = await getWorkflowById(urlWorkflowId);
         const wf = response.data;
 
         if (!wf) {
-          console.error('No workflow data received');
+          console.error('no workflow data received');
           return;
         }
 
@@ -93,7 +92,6 @@ export const useWorkflowLoader = ({
             if (!n) return null;
 
             const type = (n.type || '').toLowerCase();
-            // Guard against missing config
             const cfg = getNodeConfig(type) || { label: 'Unknown Node' }; 
             const id = n.id || n.name || `node-${idx}`;
             const position = Array.isArray(n.position)
@@ -118,7 +116,7 @@ export const useWorkflowLoader = ({
             console.warn('Skipping invalid node:', n, err);
             return null;
           }
-        }).filter(Boolean); // Remote nulls
+        }).filter(Boolean); // Remove nulls
 
         const mappedEdges = (wf.connections || []).map((c: any, idx: number) => ({
           id: `${c.source}-${c.target}-${idx}`,

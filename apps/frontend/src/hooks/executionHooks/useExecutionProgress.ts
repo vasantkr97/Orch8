@@ -104,7 +104,7 @@ export const useExecutionProgress = ({ setNodes, setEdges, setIsExecuting }: Use
   }, [setNodes, updateEdgeStates]);
 
   // Poll for real-time execution progress
-  const pollExecutionProgress = useCallback(async (executionId: string) => {
+  const pollExecutionProgress = useCallback(async (executionId: string) => { 
     try {
       // Get detailed execution info (includes results with currentNode)
       const detailsResponse = await getExecutionById(executionId);
@@ -127,7 +127,6 @@ export const useExecutionProgress = ({ setNodes, setEdges, setIsExecuting }: Use
         status
       });
 
-      // Check if execution is complete
       if (status === 'success') {
         console.log('Execution completed successfully');
         // Build final node states map for edge updates
@@ -157,16 +156,13 @@ export const useExecutionProgress = ({ setNodes, setEdges, setIsExecuting }: Use
             };
           })
         );
-        // Update edges for final state
         updateEdgeStates(finalNodeStates);
         setIsExecuting(false);
         return true;
       } else if (status === 'failed') {
         console.log('Execution failed');
-        // Build error node states map for edge updates
         const errorNodeStates = new Map<string, { isExecuting: boolean; isExecuted: boolean; hasError: boolean }>();
         
-        // Show error state
         setNodes((nodes: any[]) =>
           nodes.map((node: any) => {
             const nodeResult = results.nodeResults?.[node.id];
@@ -192,13 +188,12 @@ export const useExecutionProgress = ({ setNodes, setEdges, setIsExecuting }: Use
             };
           })
         );
-        // Update edges for error state
         updateEdgeStates(errorNodeStates);
         setIsExecuting(false);
         return true;
       }
 
-      return false; // Still running
+      return false; //Still running
     } catch (error) {
       console.error('Error polling execution progress:', error);
       return false;

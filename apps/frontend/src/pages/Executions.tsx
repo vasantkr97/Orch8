@@ -49,7 +49,6 @@ export default function Executions() {
 
   // Smart polling - only when needed
   useEffect(() => {
-    // Clear existing interval
     if (pollingInterval) {
       clearInterval(pollingInterval);
       setPollingInterval(null);
@@ -59,11 +58,11 @@ export default function Executions() {
     const hasActiveExecutions = executions.some(e => e.status === 'running' || e.status === 'pending');
 
     if (hasActiveExecutions && executions.length > 0) {
-      console.log('Starting smart polling for active executions');
+      //console.log('Starting smart polling for active executions');
       const interval = setInterval(() => {
         console.log('Polling executions...');
         fetchExecutions();
-      }, 10000); // 10 seconds
+      }, 10000);
       setPollingInterval(interval);
     } else {
       console.log(' No active executions, stopping polling');
@@ -94,20 +93,13 @@ export default function Executions() {
   };
 
   const handleDeleteExecution = async (executionId: string) => {
-    console.log('[DELETE FLOW] Starting delete for execution:', executionId);
     
-    // TODO: Replace with a proper modal confirmation dialog
-    // For now, removing window.confirm as it's being blocked by the browser
-    console.log('[DELETE FLOW] Proceeding with deletion (confirmation bypassed for testing)');
-
     try {
-      console.log('[DELETE FLOW] Attempting to delete execution:', executionId);
-      const response = await deleteExecution(executionId);
-      console.log('[DELETE FLOW] Delete response:', response);
+      await deleteExecution(executionId);
+     
       alert('Execution deleted successfully');
       fetchExecutions();
     } catch (err: any) {
-      console.error('[DELETE FLOW] Error deleting execution:', err);
       alert(`Failed to delete execution: ${err.response?.data?.error || err.message}`);
     }
   };
@@ -115,12 +107,10 @@ export default function Executions() {
   const handleViewWorkflow = (workflowId: string) => {
     // Stop polling before navigation to prevent conflicts
     if (pollingInterval) {
-      console.log('Stopping polling before navigation');
       clearInterval(pollingInterval);
       setPollingInterval(null);
     }
 
-    console.log('Navigating to workflow:', workflowId);
     navigate(`/workflow/${workflowId}`);
   };
 
@@ -242,7 +232,7 @@ export default function Executions() {
         </div>
       </div>
 
-      {/* Content */}
+      
       <div className="px-6 py-6">
         <div className="max-w-6xl mx-auto">
           {filteredExecutions.length === 0 ? (
@@ -256,7 +246,6 @@ export default function Executions() {
             </div>
           ) : (
             <>
-              {/* Executions Table */}
               <div className="bg-gray-900/40 rounded-lg overflow-hidden border border-gray-800">
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-800">

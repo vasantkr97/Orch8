@@ -12,7 +12,7 @@ export const useWorkflowState = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
   const [isLoadingWorkflow, setIsLoadingWorkflow] = useState(false);
-
+  
   const [nodes, setNodesState, onNodesChange] = useNodesState([]);
   const [edges, setEdgesState, onEdgesChange] = useEdgesState([]);
 
@@ -23,6 +23,8 @@ export const useWorkflowState = () => {
 
   // Track if draft has been loaded (only relevant when NOT on URL route)
   const draftLoaded = useRef(false);
+
+  console.log("draftLoaded", draftLoaded.current);
 
   const getStorageKey = (id: string | null) => `${STORAGE_PREFIX}${id || 'draft'}`;
 
@@ -45,7 +47,7 @@ export const useWorkflowState = () => {
       const stored = localStorage.getItem(draftKey);
       if (stored) {
         const data = JSON.parse(stored);
-        console.log('📥 Loading Draft from localStorage');
+        console.log('Loading Draft from localStorage');
         if (data.workflowTitle) setWorkflowTitle(data.workflowTitle);
         if (data.nodes) setNodesState(data.nodes);
         if (data.edges) setEdgesState(data.edges);
@@ -78,7 +80,7 @@ export const useWorkflowState = () => {
       try {
         const key = getStorageKey(id);
         localStorage.setItem(key, JSON.stringify(data));
-        // console.log('💾 Auto-saved to', key);
+        console.log('Auto-saved to', key);
       } catch (error) {
         console.error('Error saving to localStorage:', error);
       }
@@ -99,8 +101,8 @@ export const useWorkflowState = () => {
     hasSavedOnce.current = true;
 
     // Determine correct storage key:
-    // - If we have a workflowId (set by loader or by saving), use that
-    // - Otherwise use 'draft'
+    // If we have a workflowId (set by loader or by saving), use that
+    // Otherwise use 'draft'
     const keyId = workflowId || null;
 
     saveToStorage(keyId, {

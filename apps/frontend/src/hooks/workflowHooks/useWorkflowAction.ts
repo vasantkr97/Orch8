@@ -202,11 +202,10 @@ export const useWorkflowActions = ({
 
       console.log(`Execution started: ${executionId}`);
 
-      // Start execution progress tracking
+      
       if (executionId && startExecutionTracking) {
         startExecutionTracking(executionId, nodes, edges);
       } else {
-        // Fallback if no tracking available
         setTimeout(() => {
           setIsExecuting(false);
           alert(`Execution completed! ID: ${executionId}`);
