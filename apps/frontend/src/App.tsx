@@ -11,7 +11,7 @@ import SignIn from "./pages/Signin";
 import SignUp from "./pages/Signup";
 
 
-// Protected Route Component
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isLoading, authUser } = useAuthUser();
 
@@ -36,32 +36,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// Public Route Component (redirect to dashboard if already authenticated)
-// function PublicRoute({ children }: { children: React.ReactNode }) {
-//   const { isLoading, authUser } = useAuthUser();
 
-//   if (isLoading) {
-//     return (
-//       <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-gray-950 to-gray-900">
-//         <div className="mb-6 w-16 h-16 bg-gradient-to-br from-orange-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-orange-500/50 animate-pulse">
-//           <svg className="w-10 h-10 text-white" viewBox="0 0 24 24" fill="currentColor">
-//             <path d="M8 4h3v7H8V4zm5 0h3v10h-3V4zM8 13h3v7H8v-7z"/>
-//           </svg>
-//         </div>
-//         <Spinner size="lg" color="primary" />
-//         <p className="mt-4 text-gray-400 animate-pulse">Loading...</p>
-//       </div>
-//     );
-//   }
-
-//   if (authUser) {
-//     return <Navigate to="/dashboard" replace />;
-//   }
-
-//   return <>{children}</>;
-// }
-
-// Dashboard Layout Component
 function DashboardLayout() {
   return (
     <div className="flex h-screen">
@@ -77,7 +52,7 @@ export default function App() {
   return (
     <div className="h-screen bg-gray-950">
       <Routes>
-        {/* Public Routes */}
+    
         <Route
           path="/signin"
           element={
@@ -92,7 +67,6 @@ export default function App() {
           }
         />
 
-        {/* Protected Routes */}
         <Route
           path="/dashboard"
           element={
@@ -153,7 +127,6 @@ export default function App() {
           }
         />
 
-        {/* Default Redirects */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </div>

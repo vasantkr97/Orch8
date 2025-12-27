@@ -1,5 +1,4 @@
 import React from 'react';
-import { colors, transitions } from '../../styles/design-system';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'ghost' | 'outline';

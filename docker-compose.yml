@@ -1,9 +1,64 @@
 services:
+  # PostgreSQL Database
   postgres:
-    image: postgres:latest
+    image: postgres:16-alpine
+    container_name: orch8-db
     environment:
-      POSTGRES_USER: Orch8
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: postgresdb
+      POSTGRES_USER: ${POSTGRES_USER:-orch8}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-orch8}
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-orch8}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - orch8-network
+
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    container_name: orch8-backend
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-orch8}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-orch8}
+      JWT_SECRET: ${JWT_SECRET:-change-this-in-production}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:80,http://localhost:3000}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - orch8-network
+    restart: unless-stopped
+
+  # Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000/api}
+    container_name: orch8-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - orch8-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  orch8-network:
+    driver: bridge

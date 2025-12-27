@@ -12,75 +12,69 @@ datasource db {
   provider = "postgresql"
 }
 
-
 model User {
-  id                  String         @id @default(uuid())
-  email               String         @unique
-  password            String         
-  username            String
+  id       String @id @default(uuid())
+  email    String @unique
+  password String
+  username String
 
-  workflows           Workflow[]
-  credentials         Credentials[]
-  executions          Execution[]
+  workflows   Workflow[]
+  credentials Credentials[]
+  executions  Execution[]
 
-  createdAt           DateTime       @default(now())
-  updatedAt           DateTime       @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-
 model Workflow {
-  id                   String         @id @default(uuid())
-  title                String         
-  isActive             Boolean        @default(false)
-  webhookToken         String?        @unique  // Unique token for webhook authentication
-  
-  userId              String
-  user                User            @relation(fields: [userId], references: [id])
+  id           String  @id @default(uuid())
+  title        String
+  isActive     Boolean @default(false)
+  webhookToken String? @unique // Unique token for webhook authentication
 
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
-  nodes               Json
-  connections         Json
+  nodes       Json
+  connections Json
 
-  executions          Execution[]
-  
-  
+  executions Execution[]
 
-  createdAt           DateTime        @default(now())
-  updatedAt           DateTime        @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  triggerType         TriggerType      //manual, webhook
-
+  triggerType TriggerType //manual, webhook
 }
 
 model Execution {
-  id                String          @id  @default(cuid())
-  status            ExecStatus
-  mode              ExecutionMode        // "manual", "webhhok"
-  data              Json                 //All execution data and node outputs
+  id     String        @id @default(cuid())
+  status ExecStatus
+  mode   ExecutionMode // "manual", "webhhok"
+  data   Json //All execution data and node outputs
 
-  workflowId        String
-  workflow          Workflow        @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  workflowId String
+  workflow   Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
 
-  userId            String
-  user              User            @relation(fields: [userId], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
-  results           Json?
-  startedAt         DateTime?
-  finishedAt        DateTime?
-  createdAt         DateTime        @default(now())
+  results    Json?
+  startedAt  DateTime?
+  finishedAt DateTime?
+  createdAt  DateTime  @default(now())
 }
 
 model Credentials {
-  id               String           @id  @default(cuid())
-  title            String
-  platform         Platform          //googleApi, stripeApi,"apiKey", "httpHeaderAuth", "customApiKey" etc Credential type Identifier
-  data             Json              //sensitive authentication information
+  id       String   @id @default(cuid())
+  title    String
+  platform Platform //googleApi, stripeApi,"apiKey", "httpHeaderAuth", "customApiKey" etc Credential type Identifier
+  data     Json //sensitive authentication information
 
-  userId           String
-  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum ExecStatus {
@@ -105,7 +99,7 @@ enum TriggerType {
 
 enum Method {
   get
-  post 
+  post
   put
 }
 
