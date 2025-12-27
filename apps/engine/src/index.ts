@@ -53,7 +53,6 @@ export async function executeWorkflow(
 }
 
 
-//Executes workflow in background to avoid blocking the main thread 
 async function executeInBackground(
     executionId: string,
     workflowId: string,
@@ -258,7 +257,6 @@ async function executeWorkflowGraph(
 }
 
 
-//Executes a single node based on its type
 async function executeNode(
     node: WorkflowNode,
     context: ExecutionContext,

@@ -400,10 +400,8 @@ export const deleteExecution = async (req: Request, res: Response) => {
         const { executionId } = req.params
         const userId = req.user?.id
 
-        console.log(`[DELETE EXECUTION] Request received for executionId: ${executionId}, userId: ${userId}`)
 
         if (!userId) {
-            console.log('[DELETE EXECUTION] User not authenticated')
             return res.status(400).json({ error: "User not Authenticated" })
         }
 
@@ -412,18 +410,15 @@ export const deleteExecution = async (req: Request, res: Response) => {
         })
 
         if (!execution) {
-            console.log(`[DELETE EXECUTION] Execution not found: ${executionId}`)
             return res.status(404).json({ error: "Execution not found or access denied" })
         }
 
-        console.log(`[DELETE EXECUTION] Found execution, proceeding with deletion`)
         await prisma.execution.delete({
             where: {
                 id: executionId
             }
         })
 
-        console.log(`[DELETE EXECUTION] Successfully deleted execution: ${executionId}`)
         return res.status(200).json({
             success: true,
             msg: "Execution deleted successfully"
