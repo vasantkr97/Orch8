@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Toaster } from 'react-hot-toast';
 import useAuthUser from "../hooks/userHooks/useAuthUser";
 import useSignout from "../hooks/userHooks/useSignout";
 
@@ -56,12 +57,12 @@ export default function Sidebar() {
         <div className="flex items-center gap-2 mb-3">
           <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/30">
             <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M8 4h3v7H8V4zm5 0h3v10h-3V4zM8 13h3v7H8v-7z"/>
+              <path d="M8 4h3v7H8V4zm5 0h3v10h-3V4zM8 13h3v7H8v-7z" />
             </svg>
           </div>
           <h1 className="text-base font-bold text-white">orch8</h1>
         </div>
-        
+
         {authUser && (
           <div className="flex items-center gap-2 p-2 rounded-lg bg-gray-800/50 border border-gray-700/50 hover:bg-gray-800 transition-colors">
             <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gray-500 to-gray-700 flex items-center justify-center text-white text-xs font-semibold shadow-lg">
@@ -109,7 +110,7 @@ export default function Sidebar() {
 
         <div className="my-4 h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent" />
 
-       
+
         <div>
           <h2 className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-2 px-3">
             Workspace
@@ -139,6 +140,43 @@ export default function Sidebar() {
           </ul>
         </div>
       </nav>
+
+      {/* Toast notifications - positioned inside sidebar above signout */}
+      <div className="px-3 py-2">
+        <Toaster
+          position="bottom-left"
+          containerStyle={{
+            position: 'relative',
+            top: 0,
+            left: 0,
+            right: 0,
+          }}
+          toastOptions={{
+            style: {
+              background: '#1f2937',
+              color: '#f3f4f6',
+              border: '1px solid #374151',
+              borderRadius: '8px',
+              fontSize: '12px',
+              padding: '8px 12px',
+              maxWidth: '180px',
+            },
+            success: {
+              iconTheme: {
+                primary: '#10b981',
+                secondary: '#1f2937',
+              },
+            },
+            error: {
+              iconTheme: {
+                primary: '#ef4444',
+                secondary: '#1f2937',
+              },
+            },
+            duration: 3000,
+          }}
+        />
+      </div>
 
       <div className="p-3 border-t border-gray-800 bg-gray-950/50">
         <button

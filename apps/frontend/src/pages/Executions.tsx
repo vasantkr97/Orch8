@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { Badge, Button, Spinner, TableRowSkeleton } from '../components/ui';
 import { deleteExecution, getAllExecutions, stopExecution } from '../services/execution.service';
@@ -77,30 +78,46 @@ export default function Executions() {
     };
   }, [executions]); // Re-run when executions change
 
-  const handleCancelExecution = async (executionId: string) => {
-    if (!window.confirm('Are you sure you want to cancel this execution?')) {
-      return;
-    }
-
-    try {
-      await stopExecution(executionId);
-      alert('Execution cancelled successfully');
-      fetchExecutions();
-    } catch (err: any) {
-      console.error('Error cancelling execution:', err);
-      alert(`Failed to cancel execution: ${err.response?.data?.error || err.message}`);
-    }
+  const handleCancelExecution = (executionId: string) => {
+    toast((t) => (
+      <div className="flex flex-col gap-2">
+        <span className="font-medium">Cancel this execution?</span>
+        <div className="flex gap-2">
+          <button
+            onClick={async () => {
+              toast.dismiss(t.id);
+              try {
+                await stopExecution(executionId);
+                toast.success('Execution cancelled');
+                fetchExecutions();
+              } catch (err: any) {
+                toast.error(`Failed: ${err.response?.data?.error || err.message}`);
+              }
+            }}
+            className="px-2 py-1 bg-red-500 hover:bg-red-600 text-white rounded text-xs transition-colors"
+          >
+            Yes, cancel
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="px-2 py-1 bg-gray-600 hover:bg-gray-500 text-white rounded text-xs transition-colors"
+          >
+            No
+          </button>
+        </div>
+      </div>
+    ), { duration: Infinity });
   };
 
   const handleDeleteExecution = async (executionId: string) => {
-    
+
     try {
       await deleteExecution(executionId);
-     
-      alert('Execution deleted successfully');
+
+      toast.success('Execution deleted successfully');
       fetchExecutions();
     } catch (err: any) {
-      alert(`Failed to delete execution: ${err.response?.data?.error || err.message}`);
+      toast.error(`Failed to delete execution: ${err.response?.data?.error || err.message}`);
     }
   };
 
@@ -221,8 +238,8 @@ export default function Executions() {
                 key={filter.value}
                 onClick={() => setStatusFilter(filter.value)}
                 className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${statusFilter === filter.value
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-900/50 text-gray-400 hover:text-white hover:bg-gray-800'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-900/50 text-gray-400 hover:text-white hover:bg-gray-800'
                   }`}
               >
                 {filter.label}
@@ -232,7 +249,7 @@ export default function Executions() {
         </div>
       </div>
 
-      
+
       <div className="px-6 py-6">
         <div className="max-w-6xl mx-auto">
           {filteredExecutions.length === 0 ? (

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import toast from 'react-hot-toast';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteCredentials, getCredentials, postCredentials } from "../../services/credentials.service";
 
@@ -37,11 +38,11 @@ export function TelegramCredentials() {
       queryClient.invalidateQueries({ queryKey: ["credentials"] });
       setShowForm(false);
       setFormData({ title: "", botToken: "" });
-      alert('Telegram credential saved successfully!');
+      toast.success('Telegram credential saved successfully!');
     },
     onError: (error: any) => {
       console.error('Failed to create credential:', error);
-      alert(`Failed to save: ${error.response?.data?.msg || error.message}`);
+      toast.error(`Failed to save: ${error.response?.data?.msg || error.message}`);
     },
   });
 

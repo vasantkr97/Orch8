@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { Button, Badge, CardSkeleton } from '../components/ui';
 import { deleteWorkflow, getallWorkflows } from '../services/workflow.service';
@@ -27,7 +28,7 @@ export default function Projects() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
-  
+
   // Delete confirmation modal state
   const [deleteModal, setDeleteModal] = useState<{ show: boolean; workflowId: string; workflowTitle: string }>({
     show: false,
@@ -75,7 +76,7 @@ export default function Projects() {
       setDeleteModal({ show: false, workflowId: '', workflowTitle: '' });
       fetchWorkflows();
     } catch (err: any) {
-      alert(`Failed to delete workflow: ${err.response?.data?.error || err.message}`);
+      toast.error(`Failed to delete workflow: ${err.response?.data?.error || err.message}`);
     } finally {
       setIsDeleting(false);
     }
@@ -105,10 +106,10 @@ export default function Projects() {
 
   const filteredWorkflows = workflows.filter(workflow => {
     const matchesSearch = workflow.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         workflow.triggerType.toLowerCase().includes(searchQuery.toLowerCase());
+      workflow.triggerType.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = filterStatus === 'all' ||
-                         (filterStatus === 'active' && workflow.isActive) ||
-                         (filterStatus === 'inactive' && !workflow.isActive);
+      (filterStatus === 'active' && workflow.isActive) ||
+      (filterStatus === 'inactive' && !workflow.isActive);
     return matchesSearch && matchesStatus;
   });
 
@@ -140,7 +141,7 @@ export default function Projects() {
               <h1 className="text-xl font-medium text-white">Workflows</h1>
               <p className="text-xs text-gray-500 mt-0.5">{workflows.length} total</p>
             </div>
-            
+
             <button
               onClick={handleCreateNew}
               className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 border border-indigo-500 hover:border-indigo-400 text-white text-sm font-medium rounded-lg transition-all shadow-md hover:shadow-lg shadow-indigo-500/25"
@@ -175,11 +176,10 @@ export default function Projects() {
                 <button
                   key={filter.value}
                   onClick={() => setFilterStatus(filter.value as any)}
-                  className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                    filterStatus === filter.value
+                  className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${filterStatus === filter.value
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-900/50 text-gray-400 hover:text-white hover:bg-gray-800'
-                  }`}
+                    }`}
                 >
                   {filter.label}
                 </button>
@@ -245,12 +245,11 @@ export default function Projects() {
                         {workflow.executions.slice(0, 20).map((execution) => (
                           <div
                             key={execution.id}
-                            className={`flex-1 h-1 rounded-full ${
-                              execution.status === 'SUCCESS' ? 'bg-green-500' :
-                              execution.status === 'FAILED' ? 'bg-red-500' :
-                              execution.status === 'RUNNING' ? 'bg-blue-500' :
-                              'bg-yellow-500'
-                            }`}
+                            className={`flex-1 h-1 rounded-full ${execution.status === 'SUCCESS' ? 'bg-green-500' :
+                                execution.status === 'FAILED' ? 'bg-red-500' :
+                                  execution.status === 'RUNNING' ? 'bg-blue-500' :
+                                    'bg-yellow-500'
+                              }`}
                             title={execution.status}
                           />
                         ))}

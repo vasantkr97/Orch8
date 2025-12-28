@@ -4,6 +4,7 @@ import { updateWorkflow } from '../../services/workflow.service';
 import { manualExecute, webhookExecute } from '../../services/execution.service';
 import { getNodeConfig } from '../../components/nodes/nodeTypes';
 import { createWorkflow } from '../../services/workflow.service';
+import toast from 'react-hot-toast';
 
 interface UseWorkflowActionsProps {
   workflowId: string | null;
@@ -48,7 +49,7 @@ export const useWorkflowActions = ({
       } catch (error: any) {
         console.error('Error updating title:', error);
         setWorkflowTitle(oldTitle);
-        alert(`Failed to update title: ${error.response?.data?.error || error.message}`);
+        toast.error(`Failed to update title: ${error.response?.data?.error || error.message}`);
       }
     }
   }, [workflowId, workflowTitle, setWorkflowTitle]);
@@ -63,7 +64,7 @@ export const useWorkflowActions = ({
       } catch (error: any) {
         console.error('Error toggling active:', error);
         setIsWorkflowActive(!newState);
-        alert(`Failed to update status: ${error.response?.data?.error || error.message}`);
+        toast.error(`Failed to update status: ${error.response?.data?.error || error.message}`);
       }
     }
   }, [isWorkflowActive, workflowId, setIsWorkflowActive]);
@@ -85,17 +86,17 @@ export const useWorkflowActions = ({
       if (response.data?.id) {
         setWorkflowId(response.data.id);
         navigate(`/workflow/${response.data.id}`);
-        alert('New workflow created!');
+        toast.success('New workflow created!');
       }
     } catch (error: any) {
       console.error('Error creating workflow:', error);
-      alert(`Failed to create workflow: ${error.response?.data?.error || error.message}`);
+      toast.error(`Failed to create workflow: ${error.response?.data?.error || error.message}`);
     }
   }, [resetWorkflow, setWorkflowId, navigate]);
 
   const handleSave = useCallback(async () => {
     if (nodes.length === 0) {
-      alert('Add at least one node before saving.');
+      toast('Add at least one node before saving.', { icon: '⚠️' });
       return;
     }
 
@@ -149,7 +150,7 @@ export const useWorkflowActions = ({
             }
           })));
         }
-        alert('Workflow saved!');
+        toast.success('Workflow saved!');
       } else {
         const response = await createWorkflow(workflowData);
         const newId = response.data?.id || response.id;
@@ -166,12 +167,12 @@ export const useWorkflowActions = ({
             }
           })));
           navigate(`/workflow/${newId}`);
-          alert('Workflow created! You can now execute it.');
+          toast.success('Workflow created! You can now execute it.');
         }
       }
     } catch (error: any) {
       console.error('Error saving:', error);
-      alert(`Failed to save: ${error.response?.data?.error || error.message}`);
+      toast.error(`Failed to save: ${error.response?.data?.error || error.message}`);
     } finally {
       setIsSaving(false);
     }
@@ -179,18 +180,18 @@ export const useWorkflowActions = ({
 
   const handleExecute = useCallback(async () => {
     if (nodes.length === 0) {
-      alert('Add nodes to your workflow first.');
+      toast('Add nodes to your workflow first.', { icon: '⚠️' });
       return;
     }
 
     const triggerNode = nodes.find(n => getNodeConfig(n.type || '').isTrigger);
     if (!triggerNode) {
-      alert('Add a trigger node (Webhook, Manual, or Schedule).');
+      toast('Add a trigger node (Webhook, Manual, or Schedule).', { icon: '⚠️' });
       return;
     }
 
     if (!workflowId) {
-      alert('Save the workflow first.');
+      toast('Save the workflow first.', { icon: '⚠️' });
       return;
     }
 
@@ -208,33 +209,33 @@ export const useWorkflowActions = ({
       } else {
         setTimeout(() => {
           setIsExecuting(false);
-          alert(`Execution completed! ID: ${executionId}`);
+          toast.success(`Execution completed! ID: ${executionId}`);
         }, 2000);
       }
     } catch (error: any) {
       console.error('Error executing:', error);
-      alert(`Failed to execute:\n\n${error.response?.data?.error || error.message}`);
+      toast.error(`Failed to execute: ${error.response?.data?.error || error.message}`);
       setIsExecuting(false);
     }
   }, [nodes, edges, workflowId, setIsExecuting, startExecutionTracking]);
 
   const handleWebhookExecute = useCallback(async () => {
     if (!nodes.find(n => n.type === 'webhook')) {
-      alert('Add a Webhook node first.');
+      toast('Add a Webhook node first.', { icon: '⚠️' });
       return;
     }
 
     if (!workflowId) {
-      alert('Save the workflow first.');
+      toast('Save the workflow first.', { icon: '⚠️' });
       return;
     }
 
     try {
       const response = await webhookExecute(workflowId);
-      alert(`Webhook execution started!\n\nID: ${response.data?.executionId}`);
+      toast.success(`Webhook execution started! ID: ${response.data?.executionId}`);
     } catch (error: any) {
       console.error('Error executing webhook:', error);
-      alert(`Failed: ${error.response?.data?.error || error.message}`);
+      toast.error(`Failed: ${error.response?.data?.error || error.message}`);
     }
   }, [nodes, workflowId]);
 

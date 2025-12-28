@@ -1,4 +1,5 @@
 import { useState } from "react";
+import toast from 'react-hot-toast';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteCredentials, getCredentials, postCredentials } from "../../services/credentials.service";
 
@@ -37,11 +38,11 @@ export function GeminiCredentials() {
       queryClient.invalidateQueries({ queryKey: ["credentials"], exact: false });
       setShowForm(false);
       setFormData({ title: "", apiKey: "" });
-      alert('Gemini credential saved successfully!');
+      toast.success('Gemini credential saved successfully!');
     },
     onError: (error: any) => {
       console.error('Failed to create credential:', error);
-      alert(`Failed to save: ${error.response?.data?.msg || error.message}`);
+      toast.error(`Failed to save: ${error.response?.data?.msg || error.message}`);
     },
   });
 
@@ -117,7 +118,7 @@ export function GeminiCredentials() {
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, title: e.target.value }))
                   }
-                className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 text-white placeholder-gray-400"
+                  className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 text-white placeholder-gray-400"
                 />
               </div>
               <div>
@@ -131,7 +132,7 @@ export function GeminiCredentials() {
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, apiKey: e.target.value }))
                   }
-                className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 text-white placeholder-gray-400"
+                  className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 text-white placeholder-gray-400"
                 />
                 <p className="text-xs text-gray-400 mt-1">
                   Get your API key from Google AI Studio

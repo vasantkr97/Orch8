@@ -1,4 +1,5 @@
 import { memo, useState } from 'react';
+import toast from 'react-hot-toast';
 import { Handle, Position, type NodeProps, useReactFlow } from '@xyflow/react';
 import { getNodeConfig } from './nodeConfig';
 
@@ -23,11 +24,11 @@ const orch8Node = memo(({ data, selected, id }: NodeProps) => {
         e.stopPropagation();
         if (webhookUrl) {
             navigator.clipboard.writeText(webhookUrl);
-            alert('Webhook URL copied to clipboard!\n\n' + webhookUrl + '\n\n🔒 Keep it private! Anyone with this URL can trigger your workflow.\n\n💡 Make sure your workflow is Active (toggle in toolbar).');
+            toast.success('Webhook URL copied! Keep it private - anyone with this URL can trigger your workflow.');
         } else if (isWebhook && !workflowId) {
-            alert('Please save the workflow first to generate a webhook URL.');
+            toast('Save the workflow first to generate a webhook URL.', { icon: '⚠️' });
         } else if (isWebhook && !webhookToken) {
-            alert('No webhook token found. Please save the workflow to generate a webhook token.');
+            toast('No webhook token found. Save the workflow to generate one.', { icon: '⚠️' });
         }
     };
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCredentials, postCredentials } from '../../services/credentials.service';
 
@@ -37,12 +38,12 @@ export function CredentialsSelector({
       const newId = (data && (data.id || data?.data?.id || data?.credential?.id || data?.created?.id)) || '';
       if (newId) {
         onChange(String(newId));
-        alert('Credential saved successfully!');
+        toast.success('Credential saved successfully!');
       }
     },
     onError: (error: any) => {
       console.error('Failed to create credential:', error);
-      alert(`Failed to save credential: ${error.response?.data?.msg || error.message}`);
+      toast.error(`Failed to save credential: ${error.response?.data?.msg || error.message}`);
     },
   });
 
