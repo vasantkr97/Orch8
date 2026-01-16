@@ -24,41 +24,35 @@ export const Button: React.FC<ButtonProps> = ({
   const baseClasses = `
     inline-flex items-center justify-center font-semibold rounded-lg
     transition-all duration-200 ease-in-out
-    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900
+    focus:outline-none
     disabled:opacity-50 disabled:cursor-not-allowed
     active:scale-95
   `.trim();
 
   const variantClasses = {
     primary: `
-      bg-blue-600 hover:bg-blue-700 border border-blue-500 hover:border-blue-400
-      text-white shadow-md hover:shadow-lg shadow-blue-500/25
-      focus:ring-blue-500
+      bg-gray-900 hover:bg-gray-800 border border-gray-800 hover:border-gray-700
+      text-white
     `,
     secondary: `
-      bg-indigo-600 hover:bg-indigo-700 border border-indigo-500 hover:border-indigo-400
-      text-white shadow-md hover:shadow-lg shadow-indigo-500/25
-      focus:ring-indigo-500
+      bg-white hover:bg-gray-50 border border-gray-200 hover:border-gray-300
+      text-gray-700 hover:text-gray-900
     `,
     success: `
       bg-green-600 hover:bg-green-700 border border-green-500 hover:border-green-400
-      text-white shadow-md hover:shadow-lg shadow-green-500/25
-      focus:ring-green-500
+      text-white
     `,
     danger: `
       bg-red-600 hover:bg-red-700 border border-red-500 hover:border-red-400
-      text-white shadow-md hover:shadow-lg shadow-red-500/25
-      focus:ring-red-500
+      text-white
     `,
     ghost: `
       bg-transparent hover:bg-slate-800
       text-slate-300 hover:text-white
-      focus:ring-slate-500
     `,
     outline: `
       bg-transparent border-2 border-slate-700 hover:border-slate-600
       text-slate-300 hover:text-white hover:bg-slate-800/50
-      focus:ring-slate-500
     `,
   };
 

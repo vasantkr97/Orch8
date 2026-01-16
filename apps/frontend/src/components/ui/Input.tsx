@@ -32,7 +32,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       disabled:opacity-50 disabled:cursor-not-allowed
       ${error
         ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-        : 'border-gray-700 focus:border-blue-500 focus:ring-blue-500 hover:border-gray-600'
+        : 'border-gray-300 focus:border-gray-500 focus:ring-gray-500 hover:border-gray-400'
       }
       ${leftIcon ? 'pl-10' : ''}
       ${rightIcon ? 'pr-10' : ''}
@@ -45,27 +45,27 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {label}
           </label>
         )}
-        
+
         <div className="relative">
           {leftIcon && (
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
               {leftIcon}
             </div>
           )}
-          
+
           <input
             ref={ref}
             className={inputClasses}
             {...props}
           />
-          
+
           {rightIcon && (
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
               {rightIcon}
             </div>
           )}
         </div>
-        
+
         {error && (
           <p className="mt-1.5 text-sm text-red-400 flex items-center gap-1">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -74,7 +74,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {error}
           </p>
         )}
-        
+
         {helperText && !error && (
           <p className="mt-1.5 text-sm text-gray-400">
             {helperText}

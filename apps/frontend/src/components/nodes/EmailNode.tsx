@@ -19,18 +19,36 @@ const EmailNode = memo(({ data, selected, id }: NodeProps) => {
     setTimeout(() => setCopied(false), 1500);
   };
 
+  // Determine border based on state
+  const getStateStyles = () => {
+    if ((data as any)?.hasError) {
+      return 'border-red-500/80';
+    }
+    if ((data as any)?.isExecuting) {
+      return 'border-blue-400/80 animate-pulse';
+    }
+    if ((data as any)?.isExecuted) {
+      return 'border-emerald-500/80';
+    }
+    if (selected) {
+      return 'border-white/60 scale-[1.02]';
+    }
+    return 'border-white/20';
+  };
+
   return (
     <div className="relative group">
-      <div className="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20 flex gap-2">
+      {/* Floating action buttons */}
+      <div className="absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20 flex gap-3 bg-gray-900/90 backdrop-blur-sm px-4 py-2 rounded-full border border-white/10">
         <button
           onClick={handleCopyId}
           className="hover:scale-110 transition-transform"
           title={`Copy ID: ${id}`}
         >
           {copied ? (
-            <span className="text-[10px] text-green-500 font-medium">Copied!</span>
+            <span className="text-xs text-emerald-400 font-medium">Copied!</span>
           ) : (
-            <svg className="w-4.5 h-4.5 text-gray-400 hover:text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-gray-400 hover:text-blue-400 transition-colors" fill="currentColor" viewBox="0 0 24 24">
               <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
             </svg>
           )}
@@ -40,67 +58,68 @@ const EmailNode = memo(({ data, selected, id }: NodeProps) => {
           className="hover:scale-110 transition-transform"
           title="Delete node"
         >
-          <svg className="w-4.5 h-4.5 text-gray-400 hover:text-red-500" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          <svg className="w-5 h-5 text-gray-400 hover:text-red-400 transition-colors" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
           </svg>
         </button>
       </div>
 
+      {/* Node card - Pastel Style */}
       <div
-        className={`relative bg-gray-900 w-60 h-28 border-2 transition-all duration-300 flex items-center justify-center ${isTrigger ? 'rounded-l-full rounded-r-lg' : 'rounded-xl'
-          } ${(data as any)?.hasError
-            ? 'border-red-500 shadow-red-500/50'
-            : (data as any)?.isExecuting
-              ? 'border-blue-500 shadow-blue-500/50 animate-pulse'
-              : (data as any)?.isExecuted
-                ? 'border-green-500 shadow-green-500/50'
-                : (selected ? 'border-gray-500 shadow-lg scale-105' : 'border-white shadow-md')
-          } ${(data as any)?.isExecuted || (data as any)?.hasError || (data as any)?.isExecuting ? '' : 'hover:border-orange-500'} hover:shadow-lg hover:scale-102`}
+        className={`relative w-40 h-40 flex flex-col items-center justify-center rounded-[2rem] transition-all duration-300
+          bg-orange-100
+          ${getStateStyles()}
+          hover:scale-[1.02] shadow-sm hover:shadow-md
+        `}
       >
         {!isTrigger && (
           <Handle
             type="target"
             position={Position.Left}
-            className="absolute bg-gray-400 border-2 border-gray-300 rounded-full
-                       hover:scale-125 hover:border-orange-500 transition-all duration-200 z-10"
-            style={{ width: '12px', height: '12px', left: 0, top: '50%', transform: 'translate(-50%, -50%)' }}
+            className="!bg-gray-400 !border-2 !border-white hover:!border-gray-500 hover:!bg-white transition-all duration-200"
+            style={{ width: '10px', height: '10px', left: -5 }}
           />
         )}
 
         <Handle
           type="source"
           position={Position.Right}
-          className="absolute bg-gray-400 border-2 border-gray-300 rounded-full
-                     hover:scale-125 hover:border-orange-500 transition-all duration-200 z-10"
-          style={{ width: '12px', height: '12px', left: '100%', top: '50%', transform: 'translate(-50%, -50%)' }}
+          className="!bg-gray-400 !border-2 !border-white hover:!border-gray-500 hover:!bg-white transition-all duration-200"
+          style={{ width: '10px', height: '10px', right: -5 }}
         />
 
-        <div className="flex items-center justify-center">
-          <div className="w-28 h-20 bg-gradient-to-br from-red-500 to-orange-600 rounded-lg flex items-center justify-center shadow-md">
-            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm">
-              <svg viewBox="0 0 32 32" className="w-12 h-12">
-                <path fill="#4285f4" d="M5.5,5.5h0a3,3,0,0,1,3,3v18a0,0,0,0,1,0,0h-4a2,2,0,0,1-2-2V8.5a3,3,0,0,1,3-3Z" />
-                <path fill="#34A853" d="M25.5,5.5h4a0,0,0,0,1,0,0v18a3,3,0,0,1-3,3h0a3,3,0,0,1-3-3V7.5a2,2,0,0,1,2-2Z" />
-                <path fill="#EA4335" d="M16.58,19.1068l-12.69-8.0757A3,3,0,0,1,7.1109,5.97l9.31,5.9243L24.78,6.0428A3,3,0,0,1,28.22,10.9579Z" />
-                <path fill="#FBBC04" d="M29.4562,8.0656c-.0088-.06-.0081-.1213-.0206-.1812-.0192-.0918-.0549-.1766-.0823-.2652a2.9312,2.9312,0,0,0-.0958-.2993c-.02-.0475-.0508-.0892-.0735-.1354A2.9838,2.9838,0,0,0,28.9686,6.8c-.04-.0581-.09-.1076-.1342-.1626a3.0282,3.0282,0,0,0-.2455-.2849c-.0665-.0647-.1423-.1188-.2146-.1771a3.02,3.02,0,0,0-.24-.1857c-.0793-.0518-.1661-.0917-.25-.1359-.0884-.0461-.175-.0963-.267-.1331-.0889-.0358-.1837-.0586-.2766-.0859s-.1853-.06-.2807-.0777a3.0543,3.0543,0,0,0-.357-.036c-.0759-.0053-.1511-.0186-.2273-.018a2.9778,2.9778,0,0,0-.4219.0425c-.0563.0084-.113.0077-.1689.0193a33.211,33.211,0,0,0-.5645.178c-.0515.022-.0966.0547-.1465.0795A2.901,2.901,0,0,0,23.5,8.5v5.762l4.72-3.3043a2.8878,2.8878,0,0,0,1.2359-2.8923Z" />
-              </svg>
-            </div>
+        {/* Icon Container */}
+        <div className="mb-3">
+          <div
+            className="w-14 h-14"
+            style={{
+              maskImage: `url(/email-9-svgrepo-com.svg)`,
+              WebkitMaskImage: `url(/email-9-svgrepo-com.svg)`,
+              maskSize: 'contain',
+              WebkitMaskSize: 'contain',
+              maskRepeat: 'no-repeat',
+              WebkitMaskRepeat: 'no-repeat',
+              maskPosition: 'center',
+              WebkitMaskPosition: 'center',
+              backgroundColor: '#ef4444'
+            }}
+          />
+        </div>
+
+        {/* Label */}
+        <div className="text-center px-4">
+          <div className="text-gray-800 font-semibold text-base leading-tight line-clamp-2">
+            {(data as any)?.label || 'Email'}
           </div>
         </div>
       </div>
 
       {(data as any)?.showConfig && (
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 w-[500px] bg-gray-900 border border-gray-800 rounded-xl shadow-2xl p-6">
-          <div className="text-base font-semibold text-gray-200 mb-4">Quick Config</div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 w-[500px] bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-6">
+          <div className="text-lg font-semibold text-gray-200 mb-4">Quick Config</div>
           <EmailQuickConfig id={id} data={data} />
         </div>
       )}
-
-      <div className="mt-2 flex flex-col items-center text-center max-w-36 mx-auto">
-        <div className="text-lg font-medium text-gray-300 leading-tight truncate w-full">
-          {(data as any)?.label || 'Email'}
-        </div>
-      </div>
     </div>
   );
 });
@@ -146,7 +165,7 @@ function EmailQuickConfig({ id, data }: any) {
   return (
     <div className="space-y-5">
       <div>
-        <label className="block text-lg text-gray-400 mb-2">Credentials</label>
+        <label className="block text-sm text-gray-400 mb-2">Credentials</label>
         <CredentialsSelector
           credentialType="resendemail"
           selectedCredentialId={local.credentialsId}
@@ -156,18 +175,18 @@ function EmailQuickConfig({ id, data }: any) {
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-lg text-gray-400 mb-2">From</label>
+          <label className="block text-sm text-gray-400 mb-2">From</label>
           <input
-            className="w-full border rounded-lg px-4 py-3 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg"
+            className="w-full border rounded-xl px-4 py-2.5 bg-gray-800/80 text-white border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/20"
             value={(local.parameters as any)?.from || ''}
             onChange={(e) => setLocal((l) => ({ ...l, parameters: { ...(l.parameters || {}), from: e.target.value } }))}
             placeholder="from@example.com"
           />
         </div>
         <div>
-          <label className="block text-lg text-gray-400 mb-2">To</label>
+          <label className="block text-sm text-gray-400 mb-2">To</label>
           <input
-            className="w-full border rounded-lg px-4 py-3 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg"
+            className="w-full border rounded-xl px-4 py-2.5 bg-gray-800/80 text-white border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/20"
             value={(local.parameters as any)?.to || ''}
             onChange={(e) => setLocal((l) => ({ ...l, parameters: { ...(l.parameters || {}), to: e.target.value } }))}
             placeholder="to@example.com"
@@ -175,25 +194,25 @@ function EmailQuickConfig({ id, data }: any) {
         </div>
       </div>
       <div>
-        <label className="block text-lg text-gray-400 mb-2">Subject</label>
+        <label className="block text-sm text-gray-400 mb-2">Subject</label>
         <input
-          className="w-full border rounded-lg px-4 py-3 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg"
+          className="w-full border rounded-xl px-4 py-2.5 bg-gray-800/80 text-white border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/20"
           value={(local.parameters as any)?.subject || ''}
           onChange={(e) => setLocal((l) => ({ ...l, parameters: { ...(l.parameters || {}), subject: e.target.value } }))}
           placeholder="Subject"
         />
       </div>
       <div>
-        <label className="block text-lg text-gray-400 mb-2">Text</label>
+        <label className="block text-sm text-gray-400 mb-2">Text</label>
         <textarea
-          rows={4}
-          className="w-full border rounded-lg px-4 py-3 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg"
+          rows={3}
+          className="w-full border rounded-xl px-4 py-2.5 bg-gray-800/80 text-white border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/20 resize-none"
           value={(local.parameters as any)?.text || ''}
           onChange={(e) => setLocal((l) => ({ ...l, parameters: { ...(l.parameters || {}), text: e.target.value } }))}
           placeholder="Email content..."
         />
       </div>
-      <label className="inline-flex items-center gap-3 text-lg text-gray-300">
+      <label className="inline-flex items-center gap-3 text-sm text-gray-300">
         <input
           type="checkbox"
           className="accent-orange-500 w-4 h-4"
@@ -205,9 +224,9 @@ function EmailQuickConfig({ id, data }: any) {
 
       {Boolean((local.parameters as any)?.usePreviousResult) && (
         <div>
-          <label className="block text-lg text-gray-400 mb-2">Source Node ID *</label>
+          <label className="block text-sm text-gray-400 mb-2">Source Node ID *</label>
           <input
-            className="w-full border rounded-lg px-4 py-3 bg-gray-800 text-white border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg font-mono"
+            className="w-full border rounded-xl px-4 py-2.5 bg-gray-800/80 text-white border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/20 font-mono"
             value={(local.parameters as any)?.sourceNodeId || ''}
             onChange={(e) => setLocal((l) => ({
               ...l,
@@ -215,7 +234,7 @@ function EmailQuickConfig({ id, data }: any) {
             }))}
             placeholder="Paste node ID here"
           />
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-xs text-gray-500 mt-2">
             Copy the ID from the source node
           </p>
         </div>
@@ -231,7 +250,7 @@ function EmailQuickConfig({ id, data }: any) {
             });
             rf.setNodes((nodes: any[]) => nodes.map((n: any) => (n.id === id ? { ...n, data: { ...n.data, showConfig: false } } : n)));
           }}
-          className="px-5 py-2.5 text-lg rounded-lg border border-gray-700 bg-gray-800 text-white hover:bg-gray-700"
+          className="px-5 py-2 text-sm rounded-xl border border-white/10 bg-gray-800/80 text-white hover:bg-gray-700/80 transition-colors"
         >
           Cancel
         </button>
@@ -245,12 +264,12 @@ function EmailQuickConfig({ id, data }: any) {
                   ...n.data,
                   credentialsId: local.credentialsId || undefined,
                   parameters: { ...(n.data?.parameters || {}), ...(local.parameters || {}) },
-                  showConfig: false, 
+                  showConfig: false,
                 }
               };
             }));
           }}
-          className="px-5 py-2.5 text-lg rounded-lg bg-orange-600 text-white hover:bg-orange-700"
+          className="px-5 py-2 text-sm rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 transition-all"
         >
           Save Config
         </button>

@@ -92,7 +92,7 @@ export const getallWorkflows = async (req: Request, res: Response) => {
 
 export const getWorkflowById = async (req: Request, res: Response) => {
     try {
-        const { workflowId } = req.params;
+        const workflowId = req.params.workflowId as string;
         const userId = req.user?.id
 
         if (!userId) {
@@ -153,7 +153,7 @@ export const getWorkflowById = async (req: Request, res: Response) => {
 export const updateWorkflow = async (req: Request, res: Response) => {
     try {
         const userId = req.user?.id
-        const { workflowId } = req.params;
+        const workflowId = req.params.workflowId as string;
 
         if (!userId) {
             return res.status(400).json({ msg: "User not Authenticated" })
@@ -213,7 +213,7 @@ export const updateWorkflow = async (req: Request, res: Response) => {
 
 export const deleteWorkflow = async (req: Request, res: Response) => {
     try {
-        const { workflowId } = req.params
+        const workflowId = req.params.workflowId as string;
         const userId = req.user?.id
 
         if (!userId) {

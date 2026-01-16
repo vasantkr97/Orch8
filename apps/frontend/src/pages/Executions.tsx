@@ -169,7 +169,7 @@ export default function Executions() {
 
   if (isLoading && executions.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full bg-gradient-to-br from-gray-950 to-gray-900">
+      <div className="flex items-center justify-center h-full bg-[#f9fafb]">
         <Spinner size="lg" text="Loading executions..." />
       </div>
     );
@@ -177,15 +177,15 @@ export default function Executions() {
 
   if (error && executions.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full bg-gradient-to-br from-gray-950 to-gray-900">
+      <div className="flex flex-col items-center justify-center h-full bg-[#f9fafb]">
         <div className="text-center animate-fadeIn">
-          <div className="w-16 h-16 mx-auto mb-4 bg-red-500/20 rounded-2xl flex items-center justify-center">
-            <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-16 h-16 mx-auto mb-4 bg-red-50 rounded-2xl flex items-center justify-center">
+            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h3 className="text-xl font-semibold text-white mb-2">Failed to load executions</h3>
-          <p className="text-red-400 mb-6">{error}</p>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Failed to load executions</h3>
+          <p className="text-red-500 mb-6">{error}</p>
           <Button onClick={fetchExecutions} variant="primary">
             Try Again
           </Button>
@@ -195,13 +195,13 @@ export default function Executions() {
   }
 
   return (
-    <div className="h-full bg-gray-950 text-white overflow-auto">
+    <div className="h-full bg-[#f9fafb] text-gray-900 overflow-auto">
       {/* Simple Header */}
-      <div className="sticky top-0 z-10 border-b border-gray-800/50 px-6 py-4 bg-gray-950">
+      <div className="sticky top-0 z-10 border-b border-gray-200 px-6 py-4 bg-[#f9fafb]/80 backdrop-blur-md">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-xl font-medium text-white">Executions</h1>
+              <h1 className="text-xl font-semibold text-gray-900">Executions</h1>
               <p className="text-xs text-gray-500 mt-0.5">{executions.length} total</p>
             </div>
 
@@ -209,6 +209,7 @@ export default function Executions() {
               onClick={fetchExecutions}
               variant="outline"
               size="sm"
+              className="!bg-white !border-2 !border-gray-200 !hover:border-gray-900 hover:!bg-gray-900 !text-gray-700 hover:!text-white transition-all rounded-md font-medium"
               leftIcon={
                 isLoading ? (
                   <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -238,8 +239,8 @@ export default function Executions() {
                 key={filter.value}
                 onClick={() => setStatusFilter(filter.value)}
                 className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${statusFilter === filter.value
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-900/50 text-gray-400 hover:text-white hover:bg-gray-800'
+                  ? '!bg-gray-800 text-white shadow-sm hover:!bg-gray-900'
+                  : 'bg-white border border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
               >
                 {filter.label}
@@ -263,11 +264,11 @@ export default function Executions() {
             </div>
           ) : (
             <>
-              <div className="bg-gray-900/40 rounded-lg overflow-hidden border border-gray-800">
+              <div className="bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm">
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-800">
+                  <table className="min-w-full divide-y divide-gray-200">
                     <thead>
-                      <tr className="bg-gray-900/30">
+                      <tr className="bg-gray-50">
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">
                           Workflow
                         </th>
@@ -285,7 +286,7 @@ export default function Executions() {
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-800/50">
+                    <tbody className="divide-y divide-gray-200">
                       {isLoading && executions.length > 0 ? (
                         <>
                           {[1, 2, 3].map((i) => <TableRowSkeleton key={i} columns={5} />)}
@@ -294,10 +295,10 @@ export default function Executions() {
                         filteredExecutions.map((execution: Execution) => (
                           <tr
                             key={execution.id}
-                            className="hover:bg-gray-800/30 transition-colors"
+                            className="hover:bg-gray-50 transition-colors"
                           >
                             <td className="px-4 py-3">
-                              <div className="text-sm font-medium text-white">
+                              <div className="text-sm font-medium text-gray-900">
                                 {execution.workflow.title}
                               </div>
                               <div className="text-xs text-gray-500 mt-0.5">
@@ -310,22 +311,22 @@ export default function Executions() {
                               </Badge>
                             </td>
                             <td className="px-4 py-3">
-                              <div className="text-sm text-gray-300">
+                              <div className="text-sm text-gray-600">
                                 {formatDate(execution.createdAt)}
                               </div>
                             </td>
                             <td className="px-4 py-3">
-                              <span className="text-sm font-mono text-gray-400">
+                              <span className="text-sm font-mono text-gray-500">
                                 {getDuration(execution.createdAt, execution.finishedAt)}
                               </span>
                             </td>
                             <td className="px-4 py-3">
-                              <div className="flex items-center gap-1">
+                              <div className="flex items-center gap-2">
                                 <Button
                                   onClick={() => setSelectedExecutionId(execution.id)}
                                   variant="ghost"
                                   size="xs"
-                                  className="text-blue-400 hover:text-blue-300"
+                                  className="!bg-white !border-2 !border-gray-200 !hover:border-gray-900 hover:!bg-gray-900 !text-gray-700 hover:!text-white transition-all rounded-md"
                                   title="View details"
                                 >
                                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -337,7 +338,7 @@ export default function Executions() {
                                   onClick={() => handleViewWorkflow(execution.workflow.id)}
                                   variant="ghost"
                                   size="xs"
-                                  className="text-purple-400 hover:text-purple-300"
+                                  className="!bg-white !border-2 !border-gray-200 !hover:border-gray-900 hover:!bg-gray-900 !text-gray-700 hover:!text-white transition-all rounded-md"
                                   title="View workflow"
                                 >
                                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -349,7 +350,7 @@ export default function Executions() {
                                     onClick={() => handleCancelExecution(execution.id)}
                                     variant="ghost"
                                     size="xs"
-                                    className="text-yellow-400 hover:text-yellow-300"
+                                    className="!bg-white !border-2 !border-gray-200 !hover:border-gray-900 hover:!bg-gray-900 !text-gray-700 hover:!text-white transition-all rounded-md"
                                     title="Cancel"
                                   >
                                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -364,7 +365,7 @@ export default function Executions() {
                                   }}
                                   variant="ghost"
                                   size="xs"
-                                  className="text-red-400 hover:text-red-300 bg-red-900/20 border border-red-500"
+                                  className="!bg-white !border-2 !border-gray-200 !hover:border-gray-900 hover:!bg-gray-900 !text-gray-700 hover:!text-white transition-all rounded-md"
                                   title="Delete"
                                 >
                                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

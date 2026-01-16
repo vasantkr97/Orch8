@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCredentials, postCredentials } from '../../services/credentials.service';
@@ -19,6 +19,19 @@ export function CredentialsSelector({
   const queryClient = useQueryClient();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [formData, setFormData] = useState<any>({});
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const { data: response, isLoading, isError, error } = useQuery({
     queryKey: ['credentials', credentialType],
@@ -57,6 +70,9 @@ export function CredentialsSelector({
     const type = String(credentialType || '').toLowerCase();
     return platform === type || platform.includes(type) || type.includes(platform);
   });
+
+  // Get selected credential title
+  const selectedCredential = credentials.find((cred: any) => String(cred.id) === selectedCredentialId);
 
 
   const handleCreateCredential = () => {
@@ -140,7 +156,7 @@ export function CredentialsSelector({
               placeholder={`e.g., My ${credentialType}`}
               value={formData.title || ''}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full px-4 py-3 text-lg border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full px-4 py-3 text-lg border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/20"
             />
           </div>
 
@@ -152,7 +168,7 @@ export function CredentialsSelector({
                 placeholder="1234567890:ABCdef..."
                 value={formData.botToken || ''}
                 onChange={(e) => setFormData({ ...formData, botToken: e.target.value })}
-                className="w-full px-4 py-3 text-lg border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-4 py-3 text-lg border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/20"
               />
             </div>
           )}
@@ -165,7 +181,7 @@ export function CredentialsSelector({
                 placeholder="AIza..."
                 value={formData.apiKey || ''}
                 onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
-                className="w-full px-4 py-3 text-lg border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-4 py-3 text-lg border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/20"
               />
             </div>
           )}
@@ -179,7 +195,7 @@ export function CredentialsSelector({
                   placeholder="re_..."
                   value={formData.apiKey || ''}
                   onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
-                  className="w-full px-4 py-3 text-lg border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-4 py-3 text-lg border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/20"
                 />
               </div>
               <div>
@@ -189,7 +205,7 @@ export function CredentialsSelector({
                   placeholder="noreply@yourdomain.com"
                   value={formData.fromEmail || ''}
                   onChange={(e) => setFormData({ ...formData, fromEmail: e.target.value })}
-                  className="w-full px-4 py-3 text-lg border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-4 py-3 text-lg border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/20"
                 />
               </div>
             </>
@@ -219,29 +235,91 @@ export function CredentialsSelector({
   };
 
   return (
-    <div className="relative">
-      <select
-        value={selectedCredentialId || ''}
-        onChange={(e) => {
-          const value = e.target.value;
-          if (value === '__create_new__') {
-            setShowCreateForm(true);
-          } else {
-            onChange(value);
-            setShowCreateForm(false);
-          }
-        }}
-        className={`w-full border rounded-lg ${compact ? 'px-3 py-3 text-lg' : 'px-4 py-3.5 text-lg'} focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-800 text-white transition-all ${selectedCredentialId ? 'border-green-500' : 'border-gray-700'
-          }`}
+    <div className="relative" ref={dropdownRef}>
+      {/* Custom Dropdown Trigger */}
+      <button
+        type="button"
+        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        className={`w-full flex items-center justify-between border rounded-xl ${compact ? 'px-3 py-2.5 text-sm' : 'px-4 py-2.5 text-sm'} 
+          bg-gray-800/80 hover:bg-gray-700/80 text-white transition-all duration-200 cursor-pointer border-white/10
+          ${isDropdownOpen ? 'ring-1 ring-white/20' : ''}
+        `}
       >
-        <option value="">Select Credential</option>
-        {credentials.map((cred: any) => (
-          <option key={String(cred.id)} value={String(cred.id)}>
-            {cred.title}
-          </option>
-        ))}
-        <option value="__create_new__">+ Create new credential</option>
-      </select>
+        <div className="flex items-center gap-2.5 min-w-0">
+          {/* Key Icon */}
+          <svg className="w-4 h-4 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+          </svg>
+          <span className={`truncate ${selectedCredential ? 'text-white' : 'text-gray-400'}`}>
+            {selectedCredential?.title || 'Select Credential'}
+          </span>
+        </div>
+        {/* Chevron Icon */}
+        <svg 
+          className={`w-4 h-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`} 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {/* Dropdown Menu */}
+      {isDropdownOpen && (
+        <div className="absolute z-50 w-full mt-1.5 bg-gray-900 border border-white/10 rounded-xl shadow-xl overflow-hidden">
+          {/* Options List */}
+          <div className="max-h-48 overflow-y-auto">
+            {credentials.length === 0 ? (
+              <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                No credentials found
+              </div>
+            ) : (
+              credentials.map((cred: any) => (
+                <button
+                  key={String(cred.id)}
+                  type="button"
+                  onClick={() => {
+                    onChange(String(cred.id));
+                    setIsDropdownOpen(false);
+                    setShowCreateForm(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-4 py-2.5 text-sm text-left transition-colors duration-150
+                    ${String(cred.id) === selectedCredentialId 
+                      ? 'bg-gray-800/80 text-white' 
+                      : 'text-gray-400 hover:bg-gray-800/50 hover:text-white'}
+                  `}
+                >
+                  <span className="truncate">{cred.title}</span>
+                  {String(cred.id) === selectedCredentialId && (
+                    <svg className="w-4 h-4 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </button>
+              ))
+            )}
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-white/10"></div>
+
+          {/* Create New Button */}
+          <button
+            type="button"
+            onClick={() => {
+              setShowCreateForm(true);
+              setIsDropdownOpen(false);
+            }}
+            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-400 hover:bg-gray-800/50 hover:text-white transition-colors duration-150"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Create new credential</span>
+          </button>
+        </div>
+      )}
 
       {renderCreateForm()}
     </div>

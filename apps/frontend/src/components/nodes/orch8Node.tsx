@@ -7,10 +7,7 @@ const orch8Node = memo(({ data, selected, id }: NodeProps) => {
     const { deleteElements } = useReactFlow();
     const [copied, setCopied] = useState(false);
 
-    const getStatusIcon = () => {
-        return getNodeConfig((data as any)?.type).icon;
-    };
-
+    const nodeConfig = getNodeConfig((data as any)?.type);
     const isTrigger = Boolean((data as any)?.isTrigger);
     const isWebhook = (data as any)?.type === 'webhook';
     const workflowId = (data as any)?.workflowId;
@@ -44,18 +41,36 @@ const orch8Node = memo(({ data, selected, id }: NodeProps) => {
         setTimeout(() => setCopied(false), 1500);
     };
 
+    // Determine border based on state
+    const getStateStyles = () => {
+        if ((data as any)?.hasError) {
+            return 'border-red-500/80';
+        }
+        if ((data as any)?.isExecuting) {
+            return 'border-blue-400/80 animate-pulse';
+        }
+        if ((data as any)?.isExecuted) {
+            return 'border-emerald-500/80';
+        }
+        if (selected) {
+            return 'border-white/60 scale-[1.02]';
+        }
+        return 'border-white/20';
+    };
+
     return (
         <div className="relative group">
-            <div className="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20 flex gap-2">
+            {/* Floating action buttons */}
+            <div className="absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20 flex gap-3 bg-gray-900/90 backdrop-blur-sm px-4 py-2 rounded-full border border-white/10">
                 <button
                     onClick={handleCopyId}
                     className="hover:scale-110 transition-transform"
                     title={`Copy ID: ${id}`}
                 >
                     {copied ? (
-                        <span className="text-[10px] text-green-500 font-medium">Copied!</span>
+                        <span className="text-xs text-emerald-400 font-medium">Copied!</span>
                     ) : (
-                        <svg className="w-4.5 h-4.5 text-gray-400 hover:text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 text-gray-400 hover:text-blue-400 transition-colors" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
                         </svg>
                     )}
@@ -64,9 +79,9 @@ const orch8Node = memo(({ data, selected, id }: NodeProps) => {
                     <button
                         onClick={copyWebhookUrl}
                         className="hover:scale-110 transition-transform"
-                        title={webhookUrl ? "Copy webhook URL" : "Save workflow to generate webhook URL"}
+                        title="Copy webhook URL"
                     >
-                        <svg className={`w-4.5 h-4.5 ${webhookUrl ? 'text-gray-400 hover:text-purple-500' : 'text-gray-600 hover:text-gray-500'}`} fill="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 text-gray-400 hover:text-purple-400 transition-colors" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z" />
                         </svg>
                     </button>
@@ -76,55 +91,67 @@ const orch8Node = memo(({ data, selected, id }: NodeProps) => {
                     className="hover:scale-110 transition-transform"
                     title="Delete node"
                 >
-                    <svg className="w-4.5 h-4.5 text-gray-400 hover:text-red-500" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    <svg className="w-5 h-5 text-gray-400 hover:text-red-400 transition-colors" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
                     </svg>
                 </button>
             </div>
 
+            {/* Node card - Pastel Style */}
             <div
-                className={`relative bg-gray-900 w-56 h-28 border-2 transition-all duration-300 flex items-center justify-center ${isTrigger ? 'rounded-l-full rounded-r-lg' : 'rounded-lg'
-                    } ${(data as any)?.hasError
-                        ? 'border-red-500 shadow-red-500/50'
-                        : (data as any)?.isExecuting
-                            ? 'border-blue-500 shadow-blue-500/50 animate-pulse'
-                            : (data as any)?.isExecuted
-                                ? 'border-green-500 shadow-green-500/50'
-                                : (selected ? 'border-gray-500 shadow-lg scale-105' : 'border-white shadow-md')
-                    } ${(data as any)?.isExecuted || (data as any)?.hasError || (data as any)?.isExecuting ? '' : 'hover:border-orange-500'} hover:shadow-lg hover:scale-102`}
+                className={`relative w-40 h-40 flex flex-col items-center justify-center rounded-[2rem] transition-all duration-300
+                    ${nodeConfig.bgColor || 'bg-white'}
+                    ${getStateStyles()}
+                    hover:scale-[1.02] shadow-sm hover:shadow-md
+                `}
             >
                 {!isTrigger && (
                     <Handle
                         type="target"
                         position={Position.Left}
-                        className="absolute bg-gray-400 border-2 border-gray-300 rounded-full
-                       hover:scale-125 hover:border-orange-500 transition-all duration-200 z-10"
-                        style={{ width: '12px', height: '12px', left: 0, top: '50%', transform: 'translate(-50%, -50%)' }}
+                        className="!bg-gray-400 !border-2 !border-white hover:!border-gray-500 hover:!bg-white transition-all duration-200"
+                        style={{ width: '10px', height: '10px', left: -5 }}
                     />
                 )}
 
                 <Handle
                     type="source"
                     position={Position.Right}
-                    className="absolute bg-gray-400 border-2 border-gray-300 rounded-full
-                     hover:scale-125 hover:border-orange-500 transition-all duration-200 z-10"
-                    style={{ width: '12px', height: '12px', left: '100%', top: '50%', transform: 'translate(-50%, -50%)' }}
+                    className="!bg-gray-400 !border-2 !border-white hover:!border-gray-500 hover:!bg-white transition-all duration-200"
+                    style={{ width: '10px', height: '10px', right: -5 }}
                 />
 
-                <div className={`w-28 h-20 rounded-lg flex items-center justify-center shadow-md bg-gradient-to-br ${
-                    (data as any)?.type === 'webhook' 
-                        ? 'from-green-500 to-green-600' 
-                        : 'from-blue-500 to-blue-600'
-                }`}>
-                    <span className="text-4xl" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))' }}>
-                        {getStatusIcon()}
-                    </span>
+                {/* Icon Container - No background, just the icon */}
+                <div className="mb-3">
+                    {(data as any)?.type === 'gemini' ? (
+                        <img
+                            src={nodeConfig.iconPath}
+                            alt={nodeConfig.label}
+                            className="w-14 h-14"
+                        />
+                    ) : (
+                        <div
+                            className="w-14 h-14"
+                            style={{
+                                maskImage: `url(${nodeConfig.iconPath})`,
+                                WebkitMaskImage: `url(${nodeConfig.iconPath})`,
+                                maskSize: 'contain',
+                                WebkitMaskSize: 'contain',
+                                maskRepeat: 'no-repeat',
+                                WebkitMaskRepeat: 'no-repeat',
+                                maskPosition: 'center',
+                                WebkitMaskPosition: 'center',
+                                backgroundColor: nodeConfig.color
+                            }}
+                        />
+                    )}
                 </div>
-            </div>
 
-            <div className="mt-2 flex flex-col items-center text-center max-w-28 mx-auto">
-                <div className="text-base font-medium text-gray-300 leading-tight truncate w-full">
-                    {(data as any)?.label}
+                {/* Label */}
+                <div className="text-center px-4">
+                    <div className="text-gray-800 font-semibold text-base leading-tight line-clamp-2">
+                        {(data as any)?.label}
+                    </div>
                 </div>
             </div>
         </div>

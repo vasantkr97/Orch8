@@ -36,7 +36,7 @@ export const postCredentials = async (req: Request, res: Response) => {
 
 export const getCredentialById = async (req: Request, res: Response) => {
     try {
-        const { id } = req.params;
+        const id = req.params.id as string;
         const userId = req.user?.id;
 
         if (!userId) {
@@ -98,7 +98,7 @@ export const getCredentials = async (req: Request, res: Response) => {
 export const updateCredentials = async (req: Request, res: Response) => {
     try {
         const userId = req.user?.id;
-        const { id } = req.params;
+        const id = req.params.id as string;
         const { title, platform, data } = req.body;
 
         if (!userId) {
@@ -111,7 +111,7 @@ export const updateCredentials = async (req: Request, res: Response) => {
 
         const existing = await prisma.credentials.findFirst({
             where: {
-                id: id,
+                id,
                 userId
             }
         })
@@ -145,7 +145,7 @@ export const updateCredentials = async (req: Request, res: Response) => {
 export const deleteCredentials = async (req: Request, res: Response) => {
     try {
         const userId = req.user?.id;
-        const { id } = req.params;
+        const id = req.params.id as string;
 
         if (!userId) {
             return res.status(400).json({ msg: "credentials ID is required" })

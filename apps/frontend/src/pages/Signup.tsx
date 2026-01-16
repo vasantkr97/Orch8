@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import useSignup from '../hooks/userHooks/useSignup';
+import Navbar from '../components/Navbar';
 
 export default function Signup() {
   const [username, setUsername] = useState('');
@@ -17,77 +18,68 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold text-white mb-2">Sign up</h1>
-          <p className="text-sm text-gray-500">Create your account to get started</p>
-        </div>
+    <div className="min-h-screen bg-black flex items-center justify-center p-6 relative">
+      <Navbar />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-900 border border-gray-800 rounded-lg text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gray-700 transition-colors"
-              placeholder="Username"
-              required
-            />
-          </div>
+      <div className="w-full max-w-sm relative z-10 animate-in fade-in zoom-in duration-500">
+        <div className="bg-gray-900 border border-white/10 rounded-2xl p-8 shadow-2xl">
+            <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-white mb-2">Create account</h1>
+            <p className="text-sm text-gray-400">Start building your AI agents</p>
+            </div>
 
-          <div>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-900 border border-gray-800 rounded-lg text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gray-700 transition-colors"
-              placeholder="Email"
-              required
-            />
-          </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+                <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full px-4 py-3 bg-black border border-white/10 rounded-lg text-white text-sm placeholder-gray-600 focus:outline-none focus:border-white/20 transition-colors"
+                placeholder="Username"
+                required
+                />
+            </div>
 
-          <div>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-900 border border-gray-800 rounded-lg text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gray-700 transition-colors"
-              placeholder="Password"
-              required
-              minLength={6}
-            />
-          </div>
+            <div>
+                <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 bg-black border border-white/10 rounded-lg text-white text-sm placeholder-gray-600 focus:outline-none focus:border-white/20 transition-colors"
+                placeholder="Email"
+                required
+                />
+            </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full px-4 py-3 bg-white text-gray-950 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors disabled:opacity-50"
-          >
-            {isLoading ? 'Creating account...' : 'Continue'}
-          </button>
-        </form>
+            <div>
+                <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 bg-black border border-white/10 rounded-lg text-white text-sm placeholder-gray-600 focus:outline-none focus:border-white/20 transition-colors"
+                placeholder="Password"
+                required
+                minLength={6}
+                />
+            </div>
 
-        <div className="mt-6 text-center">
-          <p className="text-xs text-gray-600">
-            By signing up, you agree to our{' '}
-            <a href="#" className="text-gray-500 hover:text-gray-400">Terms</a>
-            {' '}and{' '}
-            <a href="#" className="text-gray-500 hover:text-gray-400">Privacy</a>
-          </p>
-        </div>
+            <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full px-4 py-3 bg-white text-black rounded-lg text-sm font-bold hover:bg-gray-200 transition-colors disabled:opacity-50 mt-2"
+            >
+                {isLoading ? 'Creating account...' : 'Continue'}
+            </button>
+            </form>
 
-        <div className="mt-8 text-center">
-          <span className="text-sm text-gray-500">Already have an account? </span>
-          <Link to="/signin" className="text-sm text-white hover:text-gray-300">
-            Sign in
-          </Link>
-        </div>
-
-        <div className="mt-8 text-center">
-          <Link to="/" className="text-xs text-gray-600 hover:text-gray-500">
-            ← Back to home
-          </Link>
+            <div className="mt-6 text-center">
+            <p className="text-xs text-gray-600">
+                By signing up, you agree to our{' '}
+                <a href="#" className="text-gray-500 hover:text-white transition-colors">Terms</a>
+                {' '}and{' '}
+                <a href="#" className="text-gray-500 hover:text-white transition-colors">Privacy</a>
+            </p>
+            </div>
         </div>
       </div>
     </div>

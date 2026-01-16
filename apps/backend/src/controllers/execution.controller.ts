@@ -5,7 +5,7 @@ import { executeWorkflow } from "@orch8/engine"
 
 export const manualExecute = async (req: Request, res: Response) => {
     try {
-        const { workflowId } = req.params;
+        const workflowId = req.params.workflowId as string;
         const userId = req.user?.id;
 
         if (!userId) {
@@ -49,7 +49,7 @@ export const manualExecute = async (req: Request, res: Response) => {
 
 export const webhookExecute = async (req: Request, res: Response) => {
     try {
-        const { workflowId } = req.params;
+        const workflowId = req.params.workflowId as string;
         const userId = req.user?.id;
 
         if (!userId) {
@@ -90,7 +90,7 @@ export const webhookExecute = async (req: Request, res: Response) => {
 
 export const publicWebhookExecute = async (req: Request, res: Response) => {
     try {
-        const { workflowId } = req.params
+        const workflowId = req.params.workflowId as string
 
         const tokenFromQuery = req.query.token;
         const tokenFromHeader = req.headers["x-webhook-token"];
@@ -153,7 +153,7 @@ export const publicWebhookExecute = async (req: Request, res: Response) => {
 
 export const getExecutionById = async (req: Request, res: Response) => {
     try {
-        const { executionId } = req.params;
+        const executionId = req.params.executionId as string;
         const userId = req.user?.id;
 
         if (!userId) {
@@ -248,7 +248,7 @@ export const getAllExecutions = async (req: Request, res: Response) => {
 
 export const getWorkflowExecutions = async (req: Request, res: Response) => {
     try {
-        const { workflowId } = req.params;
+        const workflowId = req.params.workflowId as string;
         const { status } = req.query;
         const userId = req.user?.id;
 
@@ -305,7 +305,7 @@ export const getWorkflowExecutions = async (req: Request, res: Response) => {
 
 export const getExecutionsStatus = async (req: Request, res: Response) => {
     try {
-        const { executionId } = req.params;
+        const executionId = req.params.executionId as string;
 
         const execution = await prisma.execution.findFirst({
             where: {
@@ -341,7 +341,7 @@ export const getExecutionsStatus = async (req: Request, res: Response) => {
 
 export const stopExecution = async (req: Request, res: Response) => {
     try {
-        const { executionId } = req.params;
+        const executionId = req.params.executionId as string;
         const userId = req.user?.id
 
         if (!userId) {
@@ -397,7 +397,7 @@ export const stopExecution = async (req: Request, res: Response) => {
 
 export const deleteExecution = async (req: Request, res: Response) => {
     try {
-        const { executionId } = req.params
+        const executionId = req.params.executionId as string;
         const userId = req.user?.id
 
 

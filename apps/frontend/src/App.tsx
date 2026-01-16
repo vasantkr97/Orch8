@@ -6,9 +6,9 @@ import Sidebar from "./pages/Sidebar";
 import Credentials from "./pages/Credentials";
 import Executions from "./pages/Executions";
 import Projects from "./pages/Projects";
-import { Spinner } from "./components/ui";
 import SignIn from "./pages/Signin";
 import SignUp from "./pages/Signup";
+import LandingPage from "./pages/LandingPage";
 
 
 
@@ -17,20 +17,32 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-gray-950 to-gray-900">
-        <div className="mb-6 w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-500/50 animate-pulse">
-          <svg className="w-10 h-10 text-white" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M8 4h3v7H8V4zm5 0h3v10h-3V4zM8 13h3v7H8v-7z" />
-          </svg>
-        </div>
-        <Spinner size="lg" color="primary" />
-        <p className="mt-4 text-gray-400 animate-pulse">Authenticating...</p>
+      <div className="flex flex-col items-center justify-center h-screen bg-black">
+        <h1 className="font-logo font-bold text-4xl text-white tracking-tight animate-pulse">Orch8</h1>
       </div>
     );
   }
 
   if (!authUser) {
     return <Navigate to="/signin" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+function PublicRoute({ children }: { children: React.ReactNode }) {
+  const { isLoading, authUser } = useAuthUser();
+
+  if (isLoading) {
+     return (
+      <div className="flex flex-col items-center justify-center h-screen bg-black">
+        <h1 className="font-logo font-bold text-4xl text-white tracking-tight animate-pulse">Orch8</h1>
+      </div>
+    );
+  }
+
+  if (authUser) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;
@@ -52,18 +64,31 @@ export default function App() {
   return (
     <div className="h-screen bg-gray-950">
       <Routes>
-    
+        
+        <Route 
+          path="/" 
+          element={
+            <PublicRoute>
+              <LandingPage />
+            </PublicRoute>
+          } 
+        />
+
         <Route
           path="/signin"
           element={
-            <SignIn />
+             <PublicRoute>
+                <SignIn />
+             </PublicRoute>
           }
         />
 
         <Route
           path="/signup"
           element={
-            <SignUp />
+            <PublicRoute>
+                <SignUp />
+            </PublicRoute>
           }
         />
 
@@ -71,7 +96,7 @@ export default function App() {
           path="/dashboard"
           element={
             <ProtectedRoute>
-                <DashboardLayout />
+              <DashboardLayout />
             </ProtectedRoute>
           }
         />
@@ -80,7 +105,7 @@ export default function App() {
           path="/workflow/:id"
           element={
             <ProtectedRoute>
-                <DashboardLayout />
+              <DashboardLayout />
             </ProtectedRoute>
           }
         />
@@ -127,7 +152,6 @@ export default function App() {
           }
         />
 
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </div>
   );
