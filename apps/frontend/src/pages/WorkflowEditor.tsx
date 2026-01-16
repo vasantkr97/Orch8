@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { ReactFlow, Controls, Background, MiniMap, BackgroundVariant, ReactFlowProvider } from "@xyflow/react";
+import { ReactFlow, Controls, Background, BackgroundVariant, ReactFlowProvider } from "@xyflow/react";
 import '@xyflow/react/dist/style.css';
 
 import { edgeTypes } from "../components/edges/edgeTypes";
