@@ -76,9 +76,9 @@ jobs:
             echo "Deploying..."
             docker compose build
             docker compose up -d postgres
-            echo "Waiting for DB..."
-            sleep 5
-            docker compose run --rm backend bunx prisma migrate deploy --config=./packages/db/prisma.config.ts
+            # Tear down old containers to free up Port 80
+            echo "Stopping old containers..."
+            docker compose down --remove-orphans
             
             # Deploy Proxy Manager
             echo "Deploying Proxy Manager..."
