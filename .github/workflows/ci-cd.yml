@@ -79,6 +79,14 @@ jobs:
             echo "Waiting for DB..."
             sleep 5
             docker compose run --rm backend bunx prisma migrate deploy --config=./packages/db/prisma.config.ts
+            
+            # Deploy Proxy Manager
+            echo "Deploying Proxy Manager..."
+            cd proxy
+            docker compose up -d
+            cd ..
+            
+            # Deploy Main App
             docker compose up -d
             
             echo "Deployment Complete!"
