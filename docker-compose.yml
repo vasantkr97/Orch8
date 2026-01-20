@@ -30,7 +30,7 @@ services:
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER:-orch8}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-orch8}
       JWT_SECRET: ${JWT_SECRET:-change-this-in-production}
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173,http://localhost:5174}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173,http://localhost:5174,http://134.209.151.139}
     ports:
       - "3000:3000"
     depends_on:
