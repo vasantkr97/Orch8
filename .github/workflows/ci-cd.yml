@@ -52,12 +52,12 @@ jobs:
           password: ${{ secrets.DIGITALOCEAN_PASSWORD }}
           envs: POSTGRES_USER,POSTGRES_PASSWORD,POSTGRES_DB,JWT_SECRET,VITE_API_URL
           script: |
-            if [ ! -d "app" ]; then
+            if [ ! -d "Orch8" ]; then
               echo "Cloning repository..."
-              git clone https://github.com/vasantkr97/Orch8.git app
+              git clone https://github.com/vasantkr97/Orch8.git Orch8
             fi
-            # Go to app directory
-            cd app
+            # Go to Orch8 directory
+            cd Orch8
             
             # Pull latest changes
             echo "Pulling latest changes..."
