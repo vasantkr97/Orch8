@@ -56,7 +56,11 @@ jobs:
               echo "Cloning repository..."
               git clone https://github.com/vasantkr97/Orch8.git app
             fi
+            # Go to app directory
             cd app
+            
+            # Pull latest changes
+            echo "Pulling latest changes..."
             git checkout main
             git pull origin main
             
@@ -68,5 +72,13 @@ jobs:
             echo "JWT_SECRET=$JWT_SECRET" >> .env
             echo "VITE_API_URL=$VITE_API_URL" >> .env
             
-            chmod +x deploy.sh
-            ./deploy.sh
+            # Deploy
+            echo "Deploying..."
+            docker compose build
+            docker compose up -d postgres
+            echo "Waiting for DB..."
+            sleep 5
+            docker compose run --rm backend bunx prisma migrate deploy --schema=./packages/db/prisma/schema.prisma
+            docker compose up -d
+            
+            echo "Deployment Complete!"
