@@ -29,21 +29,22 @@ export const signup = async (req: Request, res: Response) => {
             }
         })
 
-        const token = jwt.sign({ id: user.id, email: user.email}, JWT_SECRET);
+        const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET);
 
         res.cookie("jwt", token, {
             httpOnly: true,
             secure: false,
-            maxAge: 7*24*60*60*1000
+            maxAge: 7 * 24 * 60 * 60 * 1000
         })
 
         res.json({
             msg: "User created Successfully",
-            user: {id: user.id, email: user.email},
+            user: { id: user.id, email: user.email },
             token: token
         })
     } catch (error) {
-        res.status(500).json({ msg: "error in signingUp"})
+        console.error("Signup error:", error);
+        res.status(500).json({ msg: "error in signingUp", error: error instanceof Error ? error.message : "Unknown error" })
     }
 }
 
@@ -53,7 +54,7 @@ export const signin = async (req: Request, res: Response) => {
         const { email, password } = req.body;
 
         if (!email || !password) {
-            return res.status(400).json({ msg: "email and password requried"})
+            return res.status(400).json({ msg: "email and password requried" })
         }
 
         const user = await prisma.user.findUnique({
@@ -61,31 +62,33 @@ export const signin = async (req: Request, res: Response) => {
         })
 
         if (!user) {
-            return res.status(400).json({ msg: "user not found"})
+            return res.status(400).json({ msg: "user not found" })
         }
 
         const validPassword = await bcrypt.compare(password, user.password);
 
         if (!validPassword) {
-            return res.status(400).json({ msg: "invalid Password"})
+            return res.status(400).json({ msg: "invalid Password" })
         }
 
-        const token = jwt.sign({ id: user.id, email: user.email}, JWT_SECRET);
+        const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET);
 
         res.cookie("jwt", token, {
-            httpOnly:true,
+            httpOnly: true,
             secure: false,
-            maxAge: 7*24*60*60*1000
+            maxAge: 7 * 24 * 60 * 60 * 1000
         })
 
         res.json({
             msg: "signin Sucessfull",
-            user: { id: user.id, email: user.email},
+            user: { id: user.id, email: user.email },
             token: token
         })
     } catch (error) {
+        console.error("Signin error:", error);
         res.status(500).json({
-            msg: "error in signing in"
+            msg: "error in signing in",
+            error: error instanceof Error ? error.message : "Unknown error"
         })
     }
 }
@@ -93,7 +96,7 @@ export const signin = async (req: Request, res: Response) => {
 
 export const signout = async (req: Request, res: Response) => {
     res.clearCookie("jwt");
-    res.json({ msg: "signout successfully"})
+    res.json({ msg: "signout successfully" })
 }
 
 
