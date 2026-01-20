@@ -1,33 +1,30 @@
-# Build stage
-FROM oven/bun:1.2 AS builder
-
+FROM oven/bun:1 AS base
 WORKDIR /app
 
-# Copy package files
-COPY package.json bun.lock ./
-COPY apps/frontend/package.json ./apps/frontend/
-COPY packages/db/package.json ./packages/db/
-COPY packages/ui/package.json ./packages/ui/
-COPY packages/eslint-config/package.json ./packages/eslint-config/
-COPY packages/typescript-config/package.json ./packages/typescript-config/
-
-# Install dependencies
-RUN bun install
-
-# Copy source code
+# Prune the workspace for frontend
+FROM base AS pruner
 COPY . .
+RUN bunx turbo prune --scope=frontend --docker
 
-# Build frontend with API URL
+# Install dependencies and build
+FROM base AS builder
+COPY --from=pruner /app/out/json/ .
+COPY --from=pruner /app/out/bun.lock ./bun.lock
+RUN bun install --frozen-lockfile
+
+COPY --from=pruner /app/out/full/ .
+
+# Build args
 ARG VITE_API_URL=http://localhost:3000/api
 ENV VITE_API_URL=$VITE_API_URL
 
-WORKDIR /app/apps/frontend
-RUN bun run build
+# Build the project
+RUN bun run build --filter=frontend
 
-# Production stage with nginx
-FROM nginx:alpine AS production
+# Production runner
+FROM nginx:alpine AS runner
 
-# Copy built files
+# Copy built assets
 COPY --from=builder /app/apps/frontend/dist /usr/share/nginx/html
 
 # Copy nginx config

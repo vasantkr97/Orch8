@@ -1,52 +1,45 @@
-# Build stage
-FROM oven/bun:1.2 AS builder
-
+FROM oven/bun:1 AS base
 WORKDIR /app
 
-# Copy package files for all workspaces
-COPY package.json bun.lock ./
-COPY apps/backend/package.json ./apps/backend/
-COPY apps/engine/package.json ./apps/engine/
-COPY packages/db/package.json ./packages/db/
-COPY packages/ui/package.json ./packages/ui/
-COPY packages/eslint-config/package.json ./packages/eslint-config/
-COPY packages/typescript-config/package.json ./packages/typescript-config/
-
-# Install dependencies
-RUN bun install
-
-# Copy source code
+# Prune the workspace for backend
+FROM base AS pruner
 COPY . .
+RUN bunx turbo prune --scope=backend --docker
 
-# Generate Prisma client
-WORKDIR /app/packages/db
-RUN bunx prisma generate
+# Install dependencies and build
+FROM base AS builder
+COPY --from=pruner /app/out/json/ .
+COPY --from=pruner /app/out/bun.lock ./bun.lock
+RUN bun install --frozen-lockfile
 
-# Build backend
-WORKDIR /app/apps/backend
-RUN bun run build
+COPY --from=pruner /app/out/full/ .
 
-# Production stage
-FROM oven/bun:1.2-slim AS production
+# Generate Prisma Client (needed for backend)
+RUN bun run db:generate
+
+# Build the project
+RUN bun run build --filter=backend
+
+# Production runner
+FROM oven/bun:1-slim AS runner
+WORKDIR /app
 
 # Install OpenSSL for Prisma
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
-
-# Copy built application
-COPY --from=builder /app/apps/backend/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-
-# Copy Prisma schema and migrations for database setup
-COPY --from=builder /app/packages/db/prisma ./packages/db/prisma
-COPY --from=builder /app/packages/db/package.json ./packages/db/
-COPY --from=builder /app/packages/db/prisma.config.ts ./packages/db/
-
-# Set environment
 ENV NODE_ENV=production
 ENV PORT=3000
 
+# Copy necessary files
+# Copy the built backend
+COPY --from=builder /app/apps/backend/dist ./dist
+# Copy node_modules for runtime dependencies (prisma engine etc)
+COPY --from=builder /app/node_modules ./node_modules
+# Copy DB package for potential runtime access to schema if needed
+COPY --from=builder /app/packages/db/package.json ./packages/db/package.json
+COPY --from=builder /app/packages/db/prisma ./packages/db/prisma
+
+USER bun
 EXPOSE 3000
 
 CMD ["bun", "run", "dist/index.js"]
