@@ -127,13 +127,7 @@ function GeminiQuickConfig({ id, data }: any) {
   });
   const cancelledRef = React.useRef(false);
 
-  useEffect(() => {
-    setLocal({
-      credentialsId: data?.credentialsId || '',
-      parameters: { ...(data?.parameters || {}) },
-    });
-    cancelledRef.current = false;
-  }, [id]);
+
 
   const prevShowConfig = React.useRef(data?.showConfig);
   useEffect(() => {
