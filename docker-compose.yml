@@ -46,7 +46,7 @@ services:
       context: .
       dockerfile: apps/frontend/Dockerfile
       args:
-        VITE_API_URL: ${VITE_API_URL:-https://api.orch8.vasanth.site}
+        VITE_API_URL: ${VITE_API_URL:-http://134.209.151.139:3001/api}
     container_name: orch8-frontend
     ports:
       - "8001:80"
