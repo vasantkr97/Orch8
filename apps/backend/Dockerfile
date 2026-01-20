@@ -15,10 +15,10 @@ RUN bun install --frozen-lockfile
 COPY --from=pruner /app/out/full/ .
 
 # Generate Prisma Client (needed for backend)
-RUN bun run db:generate
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" bun run db:generate
 
 # Build the project
-RUN bun run build --filter=backend
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" bun run build --filter=backend
 
 # Production runner
 FROM oven/bun:1-slim AS runner
