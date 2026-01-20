@@ -38,6 +38,7 @@ COPY --from=builder /app/node_modules ./node_modules
 # Copy DB package for potential runtime access to schema if needed
 COPY --from=builder /app/packages/db/package.json ./packages/db/package.json
 COPY --from=builder /app/packages/db/prisma ./packages/db/prisma
+COPY --from=builder /app/packages/db/prisma.config.ts ./packages/db/prisma.config.ts
 
 USER bun
 EXPOSE 3000
