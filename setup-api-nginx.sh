@@ -94,7 +94,7 @@ if [ "$option" == "2" ]; then
     echo "Next steps:"
     echo "1. Test signup: curl https://api.orch8.vasanth.site/api/auth/signup -X POST -H 'Content-Type: application/json' -d '{\"username\":\"test\",\"email\":\"test@test.com\",\"password\":\"test123\"}'"
     echo "2. Try the frontend signup form"
-    echo "3. Check logs: ssh root@$SERVER_IP 'docker compose -f ~/app/docker-compose.yml logs backend -f'"
+    echo "3. Check logs: ssh root@$SERVER_IP 'docker compose -f ~/Orch8/docker-compose.yml logs backend -f'"
     echo ""
     
 else
