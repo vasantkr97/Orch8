@@ -43,13 +43,13 @@ app.get("/", (_, res) => {
     res.send("healthy")
 })
 
-app.use("/api/auth", authRouter);
+app.use("/auth", authRouter);
 
-app.use("/api/workflows", workflowRoutes);
+app.use("/workflows", workflowRoutes);
 
-app.use("/api/credentials", credentialsRoutes);
+app.use("/credentials", credentialsRoutes);
 
-app.use("/api/executions", executionRoutes);
+app.use("/executions", executionRoutes);
 
 
 app.listen(PORT, () => {
