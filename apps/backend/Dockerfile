@@ -40,7 +40,11 @@ COPY --from=builder /app/packages/db/package.json ./packages/db/package.json
 COPY --from=builder /app/packages/db/prisma ./packages/db/prisma
 COPY --from=builder /app/packages/db/prisma.config.ts ./packages/db/prisma.config.ts
 
+# Copy entrypoint script
+COPY apps/backend/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 USER bun
 EXPOSE 3000
 
-CMD ["bun", "run", "dist/index.js"]
+ENTRYPOINT ["/app/entrypoint.sh"]
